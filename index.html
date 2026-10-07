@@ -126,6 +126,11 @@ tr.detail td{background:var(--surface-2);white-space:normal;padding:0}
 .seg button{border:none;border-radius:0;padding:5px 10px;font-size:13px;color:var(--ink-2);background:var(--surface)}
 .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink)}
 .empty{color:var(--muted);padding:18px;text-align:center}
+.ofilters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.ofilters input,.ofilters select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 9px}
+.ofilters input{min-width:200px;flex:0 1 240px}
+.ofilters button{font-size:13px}
+.ocount{font-size:12.5px;margin-left:auto}
 footer{color:var(--muted);font-size:12px;margin-top:28px;line-height:1.6}
 @media (max-width:600px){.prow{grid-template-columns:1fr}.prow .fig{text-align:left}.hbar{grid-template-columns:110px 1fr 60px}}
 </style>
@@ -332,16 +337,17 @@ function buildModel(R){
     a.len=Math.max(a.len,r.len); if(a.order==null) a.order=r.order;
     if(MEASURED.has(r.st)){ a.measured=true; if(r.date && (!a.mDate||r.date<a.mDate)) a.mDate=r.date; }
     else if(r.st==="deviated") a.dev=true;
-    else if(r.st==="planned"){ a.planned=true; if(r.date && (!a.pDate||r.date<a.pDate)) a.pDate=r.date; }
+    else if(r.st==="planned"){ a.planned=true; if(r.date && (!a.pDate||r.date>a.pDate)) a.pDate=r.date; }
   }
-  const ordStats = ORDERS.map(o=>({o,meas:0,scheduled:0,pool:0,devOpen:0,inPlan:0}));
+  const ordStats = ORDERS.map(o=>({o,meas:0,scheduled:0,pool:0,devOpen:0,inPlan:0,late:0,lastPlan:""}));
+  const T0=todayStr();
   let unknownLen=0;
   for(const a of segAgg.values()){
     if(a.sc) continue;
     if(a.order==null){ if(a.measured) unknownLen+=a.len; continue; }
     const s=ordStats[a.order]; s.inPlan+=a.len;
     if(a.measured) s.meas+=a.len;
-    else { if(a.dev) s.devOpen+=a.len; if(a.pDate) s.scheduled+=a.len; else s.pool+=a.len; }
+    else { if(a.dev) s.devOpen+=a.len; if(a.pDate){ s.scheduled+=a.len; if(a.pDate<T0) s.late+=a.len; if(a.pDate>s.lastPlan) s.lastPlan=a.pDate; } else s.pool+=a.len; }
   }
   // orderfiler i Balder som inte finns i inbäddat index
   const known=new Set(ORDERS.map(o=>o.id));
@@ -405,57 +411,48 @@ function render(){
   app.append(secSeason(), secKpis(P,from,to), secProduction(P,from,to), secVehicles(P,from,to), secDayLog(P), secOrders(P), secDeviations(P), secAhead());
   if(RAW.replan && RAW.replan.length) app.append(secReplan(from,to));
   const q=mountQ; mountQ=[]; q.forEach(f=>f());
-  $("#foot").innerHTML = `Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Orderframsteget räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Ordertotaler kommer från beställnings-XML:erna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält.`;
+  $("#foot").innerHTML = `Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Mätområdenas framsteg räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Totalerna per mätområde kommer från XML-filerna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält.`;
 }
 
 function renderBanners(){
   const b=$("#banners"); let h="";
   if(loadErr && M) h+=`<div class="banner err">Senaste uppdateringen misslyckades (${esc(loadErr.message)}). Visar data från ${lastLoad?lastLoad.toLocaleTimeString("sv-SE"):"–"}.</div>`;
-  if(M && M.newFiles.length) h+=`<div class="banner">Balder har ${M.newFiles.length} orderfil(er) som inte finns i appens orderindex (${M.newFiles.map(f=>esc(f.filename)).join(", ")}). Ordertotalerna för dessa saknas tills orderindexet byggs om.</div>`;
-  if(M && M.unknownLen>0) h+=`<div class="banner">${km(M.unknownLen)} km uppmätta sträckor kunde inte kopplas till någon order.</div>`;
+  if(M && M.newFiles.length) h+=`<div class="banner">Balder har ${M.newFiles.length} mätområdesfil(er) som inte finns i appens index (${M.newFiles.map(f=>esc(f.filename)).join(", ")}). Totalerna för dessa saknas tills indexet byggs om.</div>`;
+  if(M && M.unknownLen>0) h+=`<div class="banner">${km(M.unknownLen)} km uppmätta sträckor kunde inte kopplas till något mätområde.</div>`;
   b.innerHTML=h;
 }
 
 function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstChild; }
 
 function secSeason(){
+  const T=todayStr();
   const tot=ORDERS.reduce((a,o)=>a+o.total,0);
-  let meas=0, sched=0, pool=0, dev=0;
-  for(const s of M.ordStats){ meas+=Math.min(s.meas,s.o.total); }
-  for(const s of M.ordStats){ sched+=s.scheduled; pool+=s.pool; dev+=s.devOpen; }
+  let meas=0, sched=0, late=0, last="";
+  for(const s of M.ordStats){ meas+=Math.min(s.meas,s.o.total); sched+=s.scheduled; late+=s.late; if(s.lastPlan>last) last=s.lastPlan; }
   const remain=Math.max(0,tot-meas);
-  // tempo: senaste 14 dagarna (alla bilar)
-  const T=todayStr(); const f14=ymd(addDays(new Date(),-13));
-  const last14=M.rows.filter(r=>MEASURED.has(r.st)&&r.date&&r.date>=f14&&r.date<=T).reduce((a,r)=>a+r.len,0);
-  const pace=last14/14;
+  const unplanned=Math.max(0,remain-sched);
   const daysLeft=Math.max(0,Math.round((parseD(SEASON_END)-parseD(T))/864e5));
-  const need=daysLeft>0?remain/daysLeft:remain;
-  const eta = pace>0 ? ymd(addDays(new Date(),Math.ceil(remain/pace))) : null;
-  const pm=100*meas/tot, ps=100*Math.min(sched,remain)/tot, pp=100*Math.min(pool,Math.max(0,remain-sched))/tot;
+  const pm=100*meas/tot;
+  const onTime = last && last<=SEASON_END && unplanned<1000;
   return el(`<section><div class="hero">
    <div class="card">
-     <div class="ink2" style="font-size:13px">Säsongen totalt · alla beställningar</div>
+     <div class="ink2" style="font-size:13px">Säsongen totalt · alla mätområden</div>
      <div class="num">${km0(meas)} <small>av ${km0(tot)} km uppmätt</small></div>
-     <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt">
-       <span style="width:${pm}%;background:var(--good)"></span>
-       <span style="width:${ps}%;background:var(--accent);opacity:.55"></span>
-       <span style="width:${pp}%;background:var(--muted);opacity:.45"></span>
-     </div>
+     <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt"><span style="width:${pm}%;background:var(--good)"></span></div>
      <div class="legend">
-       <span><i class="sw" style="background:var(--good)"></i>Uppmätt ${pct(meas,tot)}</span>
-       <span><i class="sw" style="background:var(--accent);opacity:.55"></i>Inplanerat datum ${km0(sched)} km</span>
-       <span><i class="sw" style="background:var(--muted);opacity:.45"></i>I pool utan datum ${km0(pool)} km</span>
-       <span>Ej planerat ${km0(Math.max(0,remain-sched-pool))} km</span>
+       <span><i class="sw" style="background:var(--good)"></i>Uppmätt ${km0(meas)} km · ${pct(meas,tot)}</span>
+       <span><i class="sw" style="background:var(--track);border:1px solid var(--border)"></i>Kvar att mäta ${km0(remain)} km</span>
      </div>
    </div>
    <div class="card">
-     <div class="ink2" style="font-size:13px">Prognos mot slutdatum ${fmtDate(SEASON_END)}</div>
+     <div class="ink2" style="font-size:13px">Plan mot slutdatum ${fmtDate(SEASON_END)}</div>
      <div class="statgrid">
        <div class="stat"><div class="l">Kvar att mäta</div><div class="v">${km0(remain)} km</div></div>
        <div class="stat"><div class="l">Dagar kvar</div><div class="v">${daysLeft}</div></div>
-       <div class="stat"><div class="l">Behövs per dag</div><div class="v">${km0(need)} km</div></div>
-       <div class="stat"><div class="l">Tempo senaste 14 d</div><div class="v ${pace>=need?"ok":"bad"}">${km0(pace)} km/dag</div></div>
-       <div class="stat" style="grid-column:1/-1"><div class="l">Klart med nuvarande tempo</div><div class="v ${eta&&eta<=SEASON_END?"ok":"bad"}">${eta?fmtDate(eta)+" "+eta.slice(0,4):"–"}${eta&&eta>SEASON_END?" · "+Math.round((parseD(eta)-parseD(SEASON_END))/864e5)+" dagar efter":""}</div></div>
+       <div class="stat"><div class="l">Inplanerat i Balder</div><div class="v">${km0(Math.min(sched,remain))} km</div></div>
+       <div class="stat"><div class="l">Ej inplanerat</div><div class="v ${unplanned>=1000?"bad":""}">${km0(unplanned)} km</div></div>
+       ${late>=1000?`<div class="stat" style="grid-column:1/-1"><div class="l">Planerat före idag men ej mätt</div><div class="v bad">${km0(late)} km</div></div>`:""}
+       <div class="stat" style="grid-column:1/-1"><div class="l">Klart enligt nuvarande plan</div><div class="v ${onTime?"ok":"bad"}">${last?fmtDate(last)+" "+last.slice(0,4):"–"}${last&&last>SEASON_END?" · "+Math.round((parseD(last)-parseD(SEASON_END))/864e5)+" dagar efter slutdatum":""}${unplanned>=1000?" · "+km0(unplanned)+" km saknar datum":""}</div></div>
      </div>
    </div></div></section>`);
 }
@@ -549,7 +546,7 @@ function secVehicles(P,from,to){
   return sec;
 }
 
-function orderName(i){ return i==null?"Okänd order":ORDERS[i].name; }
+function orderName(i){ return i==null?"Okänt mätområde":ORDERS[i].name; }
 
 function secDayLog(P){
   const sec=el(`<section><h2>Dagslogg<span class="h-sub">klicka på en rad för att se sträckorna</span></h2><div class="tbl-wrap"></div></section>`);
@@ -566,35 +563,63 @@ function secDayLog(P){
   const wrap=sec.querySelector(".tbl-wrap"); wrap.innerHTML=h;
   const toggle=tr=>{ const nx=tr.nextElementSibling; if(nx&&nx.classList.contains("detail")){ nx.remove(); tr.setAttribute("aria-expanded","false"); return; }
     const rs=byWd.get(tr.dataset.wd).slice().sort((a,b)=>a.seq-b.seq);
-    const inner=`<div class="inner"><table><thead><tr><th>Sträcka</th><th>Order</th><th class="n">km</th><th>Status</th><th>Felkod / notering</th></tr></thead><tbody>${rs.map(r=>`<tr><td>${esc(r.sid)}${r.sc?' <span class="muted">(egenkontroll)</span>':""}</td><td>${esc(orderName(r.order))}</td><td class="n">${km(r.len)}</td><td><span class="badge ${MEASURED.has(r.st)?"b-measured":r.st==="deviated"?"b-dev":"b-plan"}">${esc(STATUS_LBL[r.st]||r.st)}</span></td><td>${esc([r.fault?.label,r.note].filter(Boolean).join(" · "))}</td></tr>`).join("")}</tbody></table></div>`;
+    const inner=`<div class="inner"><table><thead><tr><th>Sträcka</th><th>Mätområde</th><th class="n">km</th><th>Status</th><th>Felkod / notering</th></tr></thead><tbody>${rs.map(r=>`<tr><td>${esc(r.sid)}${r.sc?' <span class="muted">(egenkontroll)</span>':""}</td><td>${esc(orderName(r.order))}</td><td class="n">${km(r.len)}</td><td><span class="badge ${MEASURED.has(r.st)?"b-measured":r.st==="deviated"?"b-dev":"b-plan"}">${esc(STATUS_LBL[r.st]||r.st)}</span></td><td>${esc([r.fault?.label,r.note].filter(Boolean).join(" · "))}</td></tr>`).join("")}</tbody></table></div>`;
     const d=document.createElement("tr"); d.className="detail"; d.innerHTML=`<td colspan="9">${inner}</td>`; tr.after(d); tr.setAttribute("aria-expanded","true"); };
   wrap.querySelectorAll("tr.click").forEach(tr=>{ tr.onclick=()=>toggle(tr); tr.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(tr); } }; });
   return sec;
 }
 
 function secOrders(P){
-  const onlyOpen = recall("onlyOpen",false);
-  const sec=el(`<section><div class="toolbar"><h2>Orderframsteg<span class="h-sub">per län och beställning · hela säsongen</span></h2>
-    <label class="ink2" style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" ${onlyOpen?"checked":""}> Dölj färdiga order</label></div><div></div></section>`);
-  sec.querySelector("input").onchange=e=>{ store("onlyOpen",e.target.checked); render(); };
+  const F=Object.assign({q:"",lan:"",typ:"",status:"",sort:"lan",dir:"asc"},recall("ordF",{}));
+  const sec=el(`<section><div class="toolbar"><h2>Mätområden<span class="h-sub">hela säsongen</span></h2></div>
+    <div class="ofilters">
+      <input type="search" placeholder="Sök mätområde…" aria-label="Sök mätområde" data-f="q">
+      <select data-f="lan" aria-label="Län"><option value="">Alla län</option></select>
+      <select data-f="typ" aria-label="Typ"><option value="">Alla typer</option><option value="std">Standard</option><option value="km">KM</option></select>
+      <select data-f="status" aria-label="Status"><option value="">Alla</option><option value="open">Ej klara</option><option value="done">Klara</option><option value="none">Ej påbörjade</option></select>
+      <select data-f="sort" aria-label="Sortera"><option value="lan">Sortera: Län</option><option value="name">Sortera: Namn</option><option value="pct">Sortera: % uppmätt</option><option value="remain">Sortera: Kvar att mäta</option><option value="meas">Sortera: Uppmätt km</option><option value="total">Sortera: Totalt km</option><option value="period">Sortera: Uppmätt i perioden</option></select>
+      <button data-f="dir" aria-label="Byt sorteringsordning"></button>
+      <span class="ocount ink2"></span>
+    </div>
+    <div class="olist"></div></section>`);
   const periodBy=new Map(); const seen=new Set();
   for(const r of P){ if(!MEASURED.has(r.st)||r.order==null||r.sc||seen.has(r.sid)) continue; const a=M.segAgg.get(r.sid); if(a.mDate!==r.date) continue; seen.add(r.sid); periodBy.set(r.order,(periodBy.get(r.order)||0)+a.len); }
-  const byLan=new Map(); for(const s of M.ordStats){ (byLan.get(s.o.lan)||byLan.set(s.o.lan,[]).get(s.o.lan)).push(s); }
-  const lanList=[...byLan.entries()].map(([lan,ss])=>({lan,name:LAN[lan]||("Län "+lan),ss,tot:ss.reduce((a,s)=>a+s.o.total,0),meas:ss.reduce((a,s)=>a+Math.min(s.meas,s.o.total),0)})).sort((a,b)=>a.name.localeCompare(b.name,"sv"));
-  const box=sec.lastElementChild;
-  for(const L of lanList){
-    const ss=L.ss.slice().sort((a,b)=>(a.o.km-b.o.km)||a.o.name.localeCompare(b.o.name,"sv")).filter(s=>!onlyOpen||s.meas<s.o.total-1);
-    if(!ss.length) continue;
-    const pm=100*L.meas/L.tot;
-    let h=`<div class="card ord-county" style="padding:0"><div class="chead"><span>${esc(L.name)}</span><span class="fig">${km(L.meas)} / ${km(L.tot)} km · ${pct(L.meas,L.tot)}</span></div><div>`;
-    for(const s of ss){ const m=Math.min(s.meas,s.o.total), t=s.o.total, rem=Math.max(0,t-m);
-      const sch=Math.min(s.scheduled,rem), pp=periodBy.get(s.o.i)||0;
-      h+=`<div class="prow"><div class="nm" title="${esc(s.o.name)}">${esc(s.o.name)}${s.o.km?'<span class="tag">KM</span>':""}</div>
-        <div class="fig"><b>${km(m)}</b> <span>/ ${km(t)} km</span> · <b>${pct(m,t)}</b>${pp?` <span>(+${km(pp)} i perioden)</span>`:""}</div>
-        <div class="pbar" role="img" aria-label="${pct(m,t)} uppmätt"><i style="width:${100*m/t}%;background:var(--good)"></i><i style="width:${100*sch/t}%;background:var(--accent);opacity:.45"></i></div></div>`; }
-    h+=`</div></div>`; box.append(el(h));
-  }
-  box.prepend(el(`<div class="legend" style="margin-bottom:10px"><span><i class="sw" style="background:var(--good)"></i>Uppmätt</span><span><i class="sw" style="background:var(--accent);opacity:.45"></i>Inplanerat med datum</span><span><i class="sw" style="background:var(--track)"></i>Kvar utan datum</span></div>`));
+  const items=M.ordStats.map(s=>{ const m=Math.min(s.meas,s.o.total); return {o:s.o,m,t:s.o.total,rem:Math.max(0,s.o.total-m),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan:LAN[s.o.lan]||("Län "+s.o.lan)}; });
+  const lanSel=sec.querySelector('[data-f="lan"]');
+  [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
+  const ctl=k=>sec.querySelector(`[data-f="${k}"]`);
+  ["q","lan","typ","status","sort"].forEach(k=>{ ctl(k).value=F[k]; });
+  const dirBtn=ctl("dir");
+  const draw=()=>{
+    store("ordF",F); dirBtn.textContent=F.dir==="asc"?"↑ Stigande":"↓ Fallande";
+    const q=F.q.trim().toLowerCase();
+    let L=items.filter(i=>(!q||i.o.name.toLowerCase().includes(q)||i.lan.toLowerCase().includes(q))
+      &&(!F.lan||i.lan===F.lan)&&(!F.typ||(F.typ==="km")===i.o.km)
+      &&(!F.status||(F.status==="done"?i.rem<1000:F.status==="open"?i.rem>=1000:i.m<1)));
+    const key={name:i=>i.o.name,pct:i=>i.p,remain:i=>i.rem,meas:i=>i.m,total:i=>i.t,period:i=>i.pp,lan:i=>i.lan}[F.sort];
+    const sgn=F.dir==="asc"?1:-1;
+    L.sort((a,b)=>{ const x=key(a),y=key(b); const c=typeof x==="string"?x.localeCompare(y,"sv"):x-y; return sgn*c || (a.o.km-b.o.km) || a.o.name.localeCompare(b.o.name,"sv"); });
+    const sm=L.reduce((a,i)=>a+i.m,0), st=L.reduce((a,i)=>a+i.t,0);
+    sec.querySelector(".ocount").textContent=`${L.length} av ${items.length} mätområden · ${km(sm)} / ${km(st)} km · ${pct(sm,st)}`;
+    const row=(i,showLan)=>`<div class="prow"><div class="nm" title="${esc(i.o.name)}">${esc(i.o.name)}${i.o.km?'<span class="tag">KM</span>':""}${showLan?` <span class="muted">· ${esc(i.lan)}</span>`:""}</div>
+        <div class="fig"><b>${km(i.m)}</b> <span>/ ${km(i.t)} km</span> · <b>${pct(i.m,i.t)}</b> <span>· kvar ${km(i.rem)} km</span>${i.pp?` <span>(+${km(i.pp)} i perioden)</span>`:""}</div>
+        <div class="pbar" role="img" aria-label="${pct(i.m,i.t)} uppmätt"><i style="width:${100*i.p}%;background:var(--good)"></i></div></div>`;
+    const box=sec.querySelector(".olist");
+    if(!L.length){ box.innerHTML=`<div class="card"><div class="empty">Inga mätområden matchar filtret.</div></div>`; return; }
+    if(F.sort==="lan"){
+      const groups=new Map(); for(const i of L){ (groups.get(i.lan)||groups.set(i.lan,[]).get(i.lan)).push(i); }
+      box.innerHTML=[...groups.entries()].map(([lan,g])=>{ const m=g.reduce((a,i)=>a+i.m,0), t=g.reduce((a,i)=>a+i.t,0);
+        g.sort((a,b)=>(a.o.km-b.o.km)||a.o.name.localeCompare(b.o.name,"sv"));
+        return `<div class="card ord-county" style="padding:0"><div class="chead"><span>${esc(lan)}</span><span class="fig">${km(m)} / ${km(t)} km · ${pct(m,t)} · kvar ${km(t-m)} km</span></div><div>${g.map(i=>row(i,false)).join("")}</div></div>`; }).join("");
+    } else {
+      box.innerHTML=`<div class="card" style="padding:0">${L.map(i=>row(i,true)).join("")}</div>`;
+    }
+  };
+  ctl("q").addEventListener("input",e=>{ F.q=e.target.value; draw(); });
+  ["lan","typ","status","sort"].forEach(k=>ctl(k).addEventListener("change",e=>{ F[k]=e.target.value;
+    if(k==="sort") F.dir = (["pct","name","lan"].includes(F.sort))?"asc":"desc"; draw(); }));
+  dirBtn.onclick=()=>{ F.dir=F.dir==="asc"?"desc":"asc"; draw(); };
+  draw();
   return sec;
 }
 
