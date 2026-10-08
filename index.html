@@ -829,9 +829,11 @@ function secOrders(P){
 
 function secDeviations(P){
   const dev=P.filter(r=>r.st==="deviated");
-  const sec=el(`<section><h2>Avvikelser<span class="h-sub">vald period</span></h2><div class="two"><div class="card"></div><div class="tbl-wrap"></div></div></section>`);
+  const open=recall("devOpen",false);
+  const sec=el(`<section><details class="fold" ${open?"open":""}><summary><span class="sum-t">Avvikelser</span><span class="h-sub">${dev.length?`${dev.length} st · ${km(dev.reduce((a,r)=>a+r.len,0))} km · ${dev.filter(r=>!M.segAgg.get(r.sid).measured).length} ej ommätta`:"inga i vald period"}</span></summary><div class="two" style="margin-top:10px"><div class="card"></div><div class="tbl-wrap"></div></div></details></section>`);
+  sec.querySelector("details").addEventListener("toggle",e=>store("devOpen",e.target.open));
   const [c1,c2]=sec.querySelectorAll(".two > div");
-  if(!dev.length){ sec.querySelector(".two").outerHTML=`<div class="card"><div class="empty">Inga avvikelser i perioden.</div></div>`; return sec; }
+  if(!dev.length){ sec.querySelector(".two").outerHTML=`<div class="card" style="margin-top:10px"><div class="empty">Inga avvikelser i perioden.</div></div>`; return sec; }
   const by=new Map(); for(const r of dev){ const k=r.fault?r.fault.label:"Ingen felkod"; const a=by.get(k)||{n:0,len:0}; a.n++; a.len+=r.len; by.set(k,a); }
   const arr=[...by.entries()].sort((a,b)=>b[1].n-a[1].n); const mx=arr[0][1].n;
   c1.innerHTML=`<div class="ink2" style="font-size:12.5px;margin-bottom:6px">Antal per felkod</div>`+arr.map(([k,a])=>`<div class="hbar"><span>${esc(k)}</span><span class="tr"><i style="width:${100*a.n/mx}%"></i></span><span class="n" style="text-align:right">${a.n} <span class="muted">· ${km0(a.len)} km</span></span></div>`).join("");
