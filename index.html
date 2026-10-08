@@ -134,6 +134,37 @@ tr.detail td{background:var(--surface-2);white-space:normal;padding:0}
 td.ids{white-space:normal;line-height:1.9;min-width:320px}
 code{font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;margin:0 4px 0 0;display:inline-block;white-space:nowrap}
 .daylog td{vertical-align:top}
+td.jr{white-space:normal;min-width:220px;font-size:12.5px}
+.jtxt{color:var(--muted);font-size:12px;margin-top:2px}
+.tbl-wrap.scroll{max-height:440px;overflow-y:auto}
+.wrap,.top-in{max-width:1680px!important}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-top:12px}
+.tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;padding:9px 14px;font-weight:600;color:var(--ink-2)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.main{min-width:0}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+.side{position:sticky;top:72px;max-height:calc(100vh - 84px);overflow-y:auto;padding-right:2px}
+.side section{margin-top:18px}
+.side .prow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
+.side .prow .fig{text-align:left;font-size:12px}
+.side .ofilters{gap:6px}
+.side .ofilters input{flex:1 1 100%;min-width:0}
+.side .ofilters select{flex:1 1 45%;min-width:0}
+.side .ocount{margin-left:0;flex:1 1 100%}
+.side .chead{padding:8px 10px;font-size:13.5px;flex-wrap:wrap}
+@media (max-width:1150px){.layout{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:none}}
+details.fold>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:4px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"▸";color:var(--muted);margin-right:6px;transition:transform .15s}
+details.fold[open]>summary::before{transform:rotate(90deg)}
+.sum-t{font-weight:650;font-size:15px}
+.dist{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--track);gap:2px}
+.dist i{display:block;height:100%}
+.eqgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.eq{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:12.5px}
+details.fold.sub>summary{padding:9px 12px}
+details.fold.sub .sum-t{font-size:13.5px}
+.ok{color:var(--good-text)}
 footer{color:var(--muted);font-size:12px;margin-top:28px;line-height:1.6}
 @media (max-width:600px){.prow{grid-template-columns:1fr}.prow .fig{text-align:left}.hbar{grid-template-columns:110px 1fr 60px}}
 </style>
@@ -151,12 +182,14 @@ footer{color:var(--muted);font-size:12px;margin-top:28px;line-height:1.6}
 
 <div class="wrap">
   <div id="banners"></div>
+  <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="matning">Mätuppföljning</button><button role="tab" data-tab="journal">Körjournal</button></nav>
   <div class="filters" id="filters">
     <div class="fgroup" id="periodChips"><span class="flabel">Period</span></div>
     <div class="fgroup" id="customRange" hidden>
       <input type="date" id="dFrom" aria-label="Från datum"> – <input type="date" id="dTo" aria-label="Till datum">
     </div>
     <div class="fgroup" id="vehChips"><span class="flabel">Bilar</span></div>
+    <div class="fgroup" id="kmGroup"><span class="flabel">KM</span><button class="chip" id="kmChip" title="Kontrollmätningar ersätts inte och är därför exkluderade som standard"></button></div>
   </div>
   <div class="range-note" id="rangeNote"></div>
 
@@ -310,8 +343,9 @@ async function loadAll(){
     const ids = wds.map(w=>w.id); const chunks=[];
     for(let i=0;i<ids.length;i+=40) chunks.push(ids.slice(i,i+40));
     const parts = await Promise.all(chunks.map(c=>restAll("work_day_segments?select=id,work_day_id,segment_id,sequence_order,status,fault_code_id,deviation_notes,skip_reason,completed_at,segment_length_m,updated_at&deleted=eq.false&work_day_id=in.("+c.join(",")+")&order=id")));
+    let diary=[]; try{ diary = await restAll("road_survey_diary?select=*&order=entry_date"); }catch(e){ diary=[]; }
     let replan=null; try{ replan = await restAll("replan_history?select=*&order=created_at.desc"); }catch(e){ replan=null; }
-    RAW = {pid, vehicles, faults, files, rsegs, wds, segs:parts.flat(), replan};
+    RAW = {pid, vehicles, faults, files, rsegs, wds, segs:parts.flat(), replan, diary};
     M = buildModel(RAW); lastLoad=new Date(); loadErr=null;
   }catch(e){ console.error(e); loadErr=e; }
   loading=false; setLive(); render();
@@ -346,7 +380,7 @@ function buildModel(R){
     const cnt=new Map(); for(const t of segsByWd.get(r.wd)) if(t.cand.length===1) cnt.set(t.cand[0],(cnt.get(t.cand[0])||0)+1);
     r.order = r.cand.slice().sort((a,b)=>(cnt.get(b)||0)-(cnt.get(a)||0)||a-b)[0];
   }
-  for(const r of rows) r.mid=matstrackaId(r,rsById);
+  for(const r of rows){ r.mid=matstrackaId(r,rsById); r.km = r.order!=null ? ORDERS[r.order].km : /_MT21$/.test(r.sid); }
   // unika sträckor för orderframsteg
   const segAgg=new Map();
   for(const r of rows){ let a=segAgg.get(r.sid); if(!a){ a={sid:r.sid,len:0,order:r.order,sc:r.sc,measured:false,mDate:null,dev:false,planned:false,pDate:null}; segAgg.set(r.sid,a); }
@@ -369,14 +403,30 @@ function buildModel(R){
   const known=new Set(ORDERS.map(o=>o.id));
   const newFiles = R.files.filter(f=>{ const m=/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.xml$/i.exec(f.filename||""); return m && !known.has(m[1]); });
   const dates = rows.filter(r=>r.date).map(r=>r.date).sort();
-  return {rows, wdById, vehMap, vlist, segAgg, ordStats, unknownLen, newFiles, faultById, firstDate:dates[0]||todayStr(), lastDate:dates[dates.length-1]||todayStr()};
+  // körjournal (road_survey_diary) → kopplas till bil via registreringsnummer
+  const num = v => { const x=parseFloat(String(v==null?"":v).replace(",",".")); return isFinite(x)?x:0; };
+  const vehByReg=new Map(); for(const v of R.vehicles){ if(v.registration) vehByReg.set(v.registration.trim().toUpperCase(),v.id); vehByReg.set(v.name.trim().toUpperCase(),v.id); }
+  const unmatchedDiary=new Set();
+  const diary=(R.diary||[]).map(d=>{ const vk=vehByReg.get(String(d.Vehicle||"").trim().toUpperCase());
+    if(!vk){ unmatchedDiary.add(d.Vehicle); return null; }
+    const so=num(d.Start_Odo), eo=num(d.End_Odo); let odo=eo-so; if(!(odo>=0&&odo<2500)) odo=null;
+    const t={prod:num(d.Time_Production),trans:num(d.Time_Transport),rain:num(d.Time_Rain),tech:num(d.Time_Vehicle_Issue)+num(d.Time_System_Issue)+num(d.Time_Calibration),
+      svc:num(d.Time_Service)+num(d.Time_Data_Handling),other:num(d.Time_Breaks)+num(d.Time_Other)};
+    const eqBad=Object.keys(d).filter(k=>k.startsWith("Eq_") && d[k] && !/ok/i.test(d[k])).map(k=>k.slice(3)+": "+d[k]);
+    return {startOdo:so||null, endOdo:eo||null, date:d.entry_date, veh:vk, driver:d.Driver||"", operator:d.Operator||"", assign:(d.Assignment||"").trim(), odo,
+      prodKm:num(d.Production_Distance)||null, transKm:num(d.Transport_Distance)||null, t, total:Object.values(t).reduce((a,b)=>a+b,0),
+      smoke:[d.DQ_Smoke_Test_Morning,d.DQ_Smoke_Test_After_Lunch,d.DQ_Smoke_Test_End_Of_Day].map(x=>String(x)==="1"),
+      lost:(d.DQ_Lost_Data||"").trim(), lostWhy:(d.DQ_Reason||"").trim(), eqBad, issues:(d.Daily_Issues||"").trim(), comments:(d.Comments||"").trim()}; }).filter(Boolean);
+  const diaryByKey=new Map(diary.map(d=>[d.date+"|"+d.veh,d]));
+  const diaryVeh=new Set(diary.map(d=>d.veh));
+  return {diary, diaryByKey, diaryVeh, unmatchedDiary:[...unmatchedDiary], rows, wdById, vehMap, vlist, segAgg, ordStats, unknownLen, newFiles, faultById, firstDate:dates[0]||todayStr(), lastDate:dates[dates.length-1]||todayStr()};
 }
 
 // ───────────────────────── Filterläge ─────────────────────────
 const PERIODS = [
   {k:"today",l:"Idag"},{k:"yesterday",l:"Igår"},{k:"week",l:"Denna vecka"},{k:"lastweek",l:"Förra veckan"},
   {k:"month",l:"Denna månad"},{k:"lastmonth",l:"Förra månaden"},{k:"30d",l:"30 dagar"},{k:"season",l:"Hela säsongen"},{k:"custom",l:"Anpassad"}];
-const S = { period: recall("period","week"), from:null, to:null, gran: recall("gran","day"), veh: new Set(recall("veh",[])) };
+const S = { incKM: recall("incKM",false), period: recall("period","week"), from:null, to:null, gran: recall("gran","day"), veh: new Set(recall("veh",[])) };
 function periodRange(){
   const t=new Date(); const T=ymd(t);
   switch(S.period){
@@ -392,9 +442,13 @@ function periodRange(){
   }
   return [T,T];
 }
+const ORD_OK = o => S.incKM || !o.km;
+const ROWS = () => S.incKM ? M.rows : M.rows.filter(r=>!r.km);
 const vehOn = k => S.veh.size===0 || S.veh.has(k);
 
 function buildFilters(){
+  const kc=$("#kmChip"); kc.setAttribute("aria-pressed",S.incKM); kc.textContent=S.incKM?"Kontrollmätningar inkluderade":"Exkl. kontrollmätningar";
+  kc.onclick=()=>{ S.incKM=!S.incKM; store("incKM",S.incKM); buildFilters(); render(); };
   const pc=$("#periodChips"); pc.querySelectorAll(".chip").forEach(c=>c.remove());
   for(const p of PERIODS){ const b=document.createElement("button"); b.className="chip"; b.textContent=p.l; b.setAttribute("aria-pressed",S.period===p.k);
     b.onclick=()=>{ S.period=p.k; store("period",p.k); if(p.k==="custom"){ const [f,t]=periodRange(); S.from=f; S.to=t; } buildFilters(); render(); }; pc.appendChild(b); }
@@ -414,6 +468,7 @@ $("#dTo").onchange=e=>{ S.to=e.target.value; render(); };
 
 // ───────────────────────── Rendering ─────────────────────────
 let charts=[], mountQ=[];
+let TAB=recall("tab","matning");
 function render(){
   charts.forEach(c=>c.destroy()); charts=[];
   renderBanners();
@@ -422,12 +477,20 @@ function render(){
   const days=Math.round((parseD(to)-parseD(from))/864e5)+1;
   $("#rangeNote").textContent = (from===to? fmtDate(from) : fmtDate(from)+" – "+fmtDate(to)+" ("+days+" dagar)") + (S.veh.size? " · "+[...S.veh].map(k=>M.vehMap.get(k)?.name).join(", ") : " · alla bilar");
   const inP = r => r.date && r.date>=from && r.date<=to && vehOn(r.veh);
-  const P = M.rows.filter(inP);
+  const P = ROWS().filter(inP);
+  const D = M.diary.filter(d=>d.date>=from && d.date<=to && vehOn(d.veh));
   const app=$("#app"); app.innerHTML="";
-  app.append(secSeason(), secKpis(P,from,to), secProduction(P,from,to), secVehicles(P,from,to), secDayLog(P), secOrders(P), secDeviations(P), secAhead());
-  if(RAW.replan && RAW.replan.length) app.append(secReplan(from,to));
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===TAB));
+  $("#kmGroup").hidden = TAB!=="matning";
+  if(TAB==="journal"){ app.append(...renderJournal(D,from,to)); }
+  else {
+    const main=el(`<div class="main"></div>`), side=el(`<aside class="side"></aside>`), lay=el(`<div class="layout"></div>`);
+    main.append(secSeason(), secKpis(P,from,to), secProduction(P,from,to), secVehicles(P,from,to,D), secDayLog(P,D), secDeviations(P), secAhead());
+    if(RAW.replan && RAW.replan.length) main.append(secReplan(from,to));
+    side.append(secOrders(P)); lay.append(main,side); app.append(lay);
+  }
   const q=mountQ; mountQ=[]; q.forEach(f=>f());
-  $("#foot").innerHTML = `Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Mätområdenas framsteg räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Totalerna per mätområde kommer från XML-filerna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält.`;
+  $("#foot").innerHTML = `Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Mätområdenas framsteg räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Totalerna per mätområde kommer från XML-filerna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält. ${S.incKM?"Kontrollmätningar (KM, mättyp 21) är inkluderade.":"Kontrollmätningar (KM, mättyp 21) är exkluderade eftersom de inte ersätts – slå på dem med KM-knappen."} Körjournalen (road_survey_diary) kopplas till bil via registreringsnummer; km per produktionstimme räknar alla uppmätta km i Balder de dagar som har journal.`;
 }
 
 function renderBanners(){
@@ -435,6 +498,7 @@ function renderBanners(){
   if(loadErr && M) h+=`<div class="banner err">Senaste uppdateringen misslyckades (${esc(loadErr.message)}). Visar data från ${lastLoad?lastLoad.toLocaleTimeString("sv-SE"):"–"}.</div>`;
   if(M && M.newFiles.length) h+=`<div class="banner">Balder har ${M.newFiles.length} mätområdesfil(er) som inte finns i appens index (${M.newFiles.map(f=>esc(f.filename)).join(", ")}). Totalerna för dessa saknas tills indexet byggs om.</div>`;
   if(M && M.unknownLen>0) h+=`<div class="banner">${km(M.unknownLen)} km uppmätta sträckor kunde inte kopplas till något mätområde.</div>`;
+  if(M && M.unmatchedDiary.length) h+=`<div class="banner">Körjournalen innehåller fordon som inte finns i Balder: ${M.unmatchedDiary.map(esc).join(", ")}.</div>`;
   b.innerHTML=h;
 }
 
@@ -442,9 +506,9 @@ function el(html){ const t=document.createElement("template"); t.innerHTML=html.
 
 function secSeason(){
   const T=todayStr();
-  const tot=ORDERS.reduce((a,o)=>a+o.total,0);
+  const tot=ORDERS.filter(ORD_OK).reduce((a,o)=>a+o.total,0);
   let meas=0, sched=0, late=0, last="";
-  for(const s of M.ordStats){ meas+=Math.min(s.meas,s.o.total); sched+=s.scheduled; late+=s.late; if(s.lastPlan>last) last=s.lastPlan; }
+  for(const s of M.ordStats){ if(!ORD_OK(s.o)) continue; meas+=Math.min(s.meas,s.o.total); sched+=s.scheduled; late+=s.late; if(s.lastPlan>last) last=s.lastPlan; }
   const remain=Math.max(0,tot-meas);
   const unplanned=Math.max(0,remain-sched);
   const daysLeft=Math.max(0,Math.round((parseD(SEASON_END)-parseD(T))/864e5));
@@ -452,7 +516,7 @@ function secSeason(){
   const onTime = last && last<=SEASON_END && unplanned<1000;
   return el(`<section><div class="hero">
    <div class="card">
-     <div class="ink2" style="font-size:13px">Säsongen totalt · alla mätområden</div>
+     <div class="ink2" style="font-size:13px">Säsongen totalt · ${S.incKM?"alla mätområden inkl. kontrollmätningar":"exkl. kontrollmätningar (KM)"}</div>
      <div class="num">${km0(meas)} <small>av ${km0(tot)} km uppmätt</small></div>
      <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt"><span style="width:${pm}%;background:var(--good)"></span></div>
      <div class="legend">
@@ -495,7 +559,8 @@ function secProduction(P,from,to){
   const sec=el(`<section><div class="toolbar"><h2>Produktion per bil<span class="h-sub">uppmätta km</span></h2>
     <div class="seg" role="group" aria-label="Upplösning">${[["day","Dag"],["week","Vecka"],["month","Månad"]].map(([k,l])=>`<button data-g="${k}" aria-pressed="${S.gran===k}">${l}</button>`).join("")}</div></div>
     <div class="card"><div class="chartbox"><canvas aria-label="Uppmätta km per bil och period"></canvas></div></div>
-    <div class="tbl-wrap" style="margin-top:12px"></div></section>`);
+    <details class="fold sub" style="margin-top:12px" ${recall("ptOpen",false)?"open":""}><summary><span class="sum-t">Tabell</span><span class="h-sub">km per bil och period</span></summary><div class="tbl-wrap" style="margin-top:10px"></div></details></section>`);
+  sec.querySelector("details").addEventListener("toggle",e=>store("ptOpen",e.target.open));
   sec.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ S.gran=b.dataset.g; store("gran",S.gran); render(); });
   let g=S.gran; let keys=buckets(from,to,g);
   if(g==="day" && keys.length>120){ g="week"; keys=buckets(from,to,g); sec.querySelector(".h-sub").textContent="uppmätta km · visas per vecka (för många dagar)"; }
@@ -525,14 +590,14 @@ function secProduction(P,from,to){
   return sec;
 }
 
-function secVehicles(P,from,to){
+function secVehicles(P,from,to,D){
   const T=todayStr();
   const sec=el(`<section><h2>Bilar<span class="h-sub">vald period · idag ${fmtDate(T)}</span></h2><div class="vgrid"></div></section>`);
   const g=sec.querySelector(".vgrid");
   const spDays=[]; for(let i=13;i>=0;i--) spDays.push(ymd(addDays(new Date(),-i)));
   for(const v of M.vlist){ if(!vehOn(v.key)) continue;
     const mine=P.filter(r=>r.veh===v.key); const m=mine.filter(r=>MEASURED.has(r.st));
-    const all=M.rows.filter(r=>r.veh===v.key && r.date);
+    const all=ROWS().filter(r=>r.veh===v.key && r.date);
     if(v.key==="none" && !all.length) continue;
     const kmM=m.reduce((a,r)=>a+r.len,0); const vd=new Set(m.map(r=>r.date)).size;
     const dev=mine.filter(r=>r.st==="deviated").length;
@@ -550,6 +615,8 @@ function secVehicles(P,from,to){
         <dt>Idag</dt><dd>${today.length?`${km(todayDone)} / ${km(todayPlan)} km`:'<span class="muted">ingen plan</span>'}</dd>
         ${labels?`<dt>Dagens rutt</dt><dd style="white-space:normal">${esc(labels)}</dd>`:""}
         <dt>Uppmätta sträckor</dt><dd>${m.length}</dd>
+        ${(()=>{ const dd=D.filter(d=>d.veh===v.key); if(!dd.length) return M.diaryVeh.has(v.key)?`<dt>Körjournal</dt><dd class="muted">ingen i perioden</dd>`:""; const ph=dd.reduce((a,d)=>a+d.t.prod,0), th=dd.reduce((a,d)=>a+d.total,0); const mk=M.rows.filter(r=>r.veh===v.key&&MEASURED.has(r.st)&&dd.some(d=>d.date===r.date)).reduce((a,r)=>a+r.len,0);
+          return `<dt>Produktionstid</dt><dd>${nf1.format(ph)} h av ${nf1.format(th)} h (${th?nf0.format(100*ph/th):0} %)</dd><dt>Km per prod.timme</dt><dd>${ph?nf1.format(mk/1000/ph):"–"}</dd>`; })()}
         <dt>Avvikelser</dt><dd>${dev}</dd>
         <dt>Bästa dag</dt><dd>${bestDay?`${km(bestDay[1])} km · ${fmtDate(bestDay[0])}`:"–"}</dd>
         <dt>Senast mätt</dt><dd>${lastM?fmtDate(lastM):"–"}</dd>
@@ -562,11 +629,119 @@ function secVehicles(P,from,to){
   return sec;
 }
 
+const TCATS=[["prod","Produktion","--s1"],["trans","Transport","--s2"],["rain","Regn","--s3"],["tech","Tekniska problem","--s4"],["svc","Service & data","--s5"],["other","Raster & övrigt","--s6"]];
+function renderJournal(D,from,to){
+  const out=[]; const sum=(arr,f)=>arr.reduce((a,x)=>a+(f(x)||0),0);
+  const vs=M.vlist.filter(v=>vehOn(v.key)&&M.diaryVeh.has(v.key));
+  if(!M.diary.length){ out.push(el(`<section><div class="card"><div class="empty">Ingen körjournal hittades i Supabase (road_survey_diary).</div></div></section>`)); return out; }
+  if(!D.length){ out.push(el(`<section><div class="card"><div class="empty">Inga körjournalsrader i vald period. Körjournal finns för ${M.vlist.filter(v=>M.diaryVeh.has(v.key)).map(v=>esc(v.name)).join(", ")} från ${fmtDate(M.diary[0].date)}.</div></div></section>`)); return out; }
+  const balderOf=(veh,date)=>M.rows.filter(r=>r.veh===veh&&r.date===date&&MEASURED.has(r.st)).reduce((a,r)=>a+r.len,0)/1000;
+  for(const d of D) d.balder=balderOf(d.veh,d.date);
+  const T=sum(D,d=>d.total), Tp=sum(D,d=>d.t.prod), Tr=sum(D,d=>d.t.rain), Tt=sum(D,d=>d.t.tech), Ttr=sum(D,d=>d.t.trans);
+  const odo=sum(D,d=>d.odo), tk=sum(D,d=>d.transKm), bk=sum(D,d=>d.balder);
+  const smokeN=D.length*3, smokeOk=sum(D,d=>d.smoke.filter(Boolean).length);
+  const rainDays=D.filter(d=>d.t.rain>=4).length, techDays=D.filter(d=>d.t.tech>0||d.eqBad.length).length, prodDays=D.filter(d=>d.t.prod>0).length;
+  out.push(el(`<section><div class="grid-kpi">
+    <div class="card kpi"><div class="lbl">Arbetad tid</div><div class="val">${nf0.format(T)}<small>h</small></div><div class="foot">${D.length} journaldagar · snitt ${nf1.format(T/D.length)} h/dag</div></div>
+    <div class="card kpi"><div class="lbl">Produktionstid</div><div class="val">${nf0.format(Tp)}<small>h</small></div><div class="foot">${T?nf0.format(100*Tp/T):0} % av arbetad tid · ${prodDays} dagar</div></div>
+    <div class="card kpi"><div class="lbl">Uppmätt per produktionstimme</div><div class="val">${Tp?nf1.format(bk/Tp):"–"}<small>km/h</small></div><div class="foot">${nf0.format(bk)} km uppmätt i Balder (inkl. KM)</div></div>
+    <div class="card kpi"><div class="lbl">Uppmätt per arbetstimme</div><div class="val">${T?nf1.format(bk/T):"–"}<small>km/h</small></div><div class="foot">all tid inräknad</div></div>
+    <div class="card kpi"><div class="lbl">Körda km (mätare)</div><div class="val">${nf0.format(odo)}<small>km</small></div><div class="foot">${odo?nf0.format(100*bk/odo):0} % blev uppmätt km${tk?" · "+nf0.format(tk)+" km transport":""}</div></div>
+    <div class="card kpi"><div class="lbl">Väder</div><div class="val">${nf0.format(Tr)}<small>h regn</small></div><div class="foot">${rainDays} dagar med minst 4 h regn</div></div>
+    <div class="card kpi"><div class="lbl">Tekniska problem</div><div class="val">${nf1.format(Tt)}<small>h</small></div><div class="foot">${techDays} dagar med fel eller utrustningsavvikelse</div></div>
+    <div class="card kpi"><div class="lbl">Smoke tests utförda</div><div class="val">${smokeN?nf0.format(100*smokeOk/smokeN):0}<small>%</small></div><div class="foot">${smokeOk} av ${smokeN} (morgon, lunch, kväll)</div></div>
+  </div></section>`));
+  let g=S.gran, bks=buckets(from,to,g); if(g==="day"&&bks.length>120){ g="week"; bks=buckets(from,to,g); }
+  const ink2=css("--ink-2"), grid=css("--grid"), muted=css("--muted");
+  const baseOpts=(unit,stacked)=>({responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{position:"top",align:"end",labels:{color:ink2,boxWidth:10,boxHeight:10,useBorderRadius:true,borderRadius:3}},
+      tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw==null?"–":nf1.format(c.raw)} ${unit}`}}},
+    scales:{x:{stacked,grid:{display:false},ticks:{color:muted,maxRotation:0,autoSkip:true}},y:{stacked,beginAtZero:true,grid:{color:grid},border:{display:false},ticks:{color:muted},title:{display:true,text:unit,color:muted}}}});
+  const gsel=`<div class="seg" role="group" aria-label="Upplösning">${[["day","Dag"],["week","Vecka"],["month","Månad"]].map(([k,l])=>`<button data-g="${k}" aria-pressed="${g===k}">${l}</button>`).join("")}</div>`;
+  // 1. timmar per kategori
+  const c1=el(`<section><div class="toolbar"><h2>Tidsanvändning<span class="h-sub">timmar per kategori${g!==S.gran?" · visas per vecka":""}</span></h2>${gsel}</div><div class="card"><div class="chartbox"><canvas aria-label="Timmar per kategori och period"></canvas></div></div></section>`);
+  c1.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ S.gran=b.dataset.g; store("gran",S.gran); render(); });
+  const agg=new Map(bks.map(k=>[k,Object.fromEntries(TCATS.map(c=>[c[0],0]))]));
+  for(const d of D){ const a=agg.get(bucketKey(d.date,g)); if(a) for(const c of TCATS) a[c[0]]+=d.t[c[0]]; }
+  const cv1=c1.querySelector("canvas");
+  mountQ.push(()=>{ const o=baseOpts("h",true); o.plugins.tooltip.filter=i=>i.raw>0; o.plugins.tooltip.callbacks.footer=items=>"Totalt: "+nf1.format(items.reduce((a,i)=>a+i.raw,0))+" h";
+    charts.push(new Chart(cv1,{type:"bar",data:{labels:bks.map(k=>bucketLabel(k,g)),datasets:TCATS.map(c=>({label:c[1],data:bks.map(k=>+agg.get(k)[c[0]].toFixed(2)),backgroundColor:css(c[2]),borderRadius:3,borderColor:css("--surface"),borderWidth:{top:2,left:0,right:0,bottom:0},maxBarThickness:46}))},options:o})); });
+  out.push(c1);
+  // 2. effektivitet + km mätare mot uppmätt
+  const two=el(`<section><div class="two">
+    <div class="card"><div class="ink2" style="font-size:12.5px;margin-bottom:6px">Uppmätt km per produktionstimme · per bil</div><div class="chartbox" style="height:260px"><canvas></canvas></div></div>
+    <div class="card"><div class="ink2" style="font-size:12.5px;margin-bottom:6px">Körda km (mätare) mot uppmätt km i Balder</div><div class="chartbox" style="height:260px"><canvas></canvas></div></div>
+  </div></section>`);
+  const [cv2,cv3]=two.querySelectorAll("canvas");
+  const effG = g==="day" ? "week" : g; const ebks=buckets(from,to,effG);
+  const eff=vs.map(v=>({v,data:ebks.map(k=>{ const dd=D.filter(d=>d.veh===v.key&&bucketKey(d.date,effG)===k); const ph=sum(dd,d=>d.t.prod); return ph>=1?+(sum(dd,d=>d.balder)/ph).toFixed(1):null; })}));
+  const odoB=bks.map(k=>sum(D.filter(d=>bucketKey(d.date,g)===k),d=>d.odo)), balB=bks.map(k=>sum(D.filter(d=>bucketKey(d.date,g)===k),d=>d.balder));
+  mountQ.push(()=>{
+    charts.push(new Chart(cv2,{type:"line",data:{labels:ebks.map(k=>bucketLabel(k,effG)),datasets:eff.map(e=>({label:e.v.name,data:e.data,borderColor:css(e.v.color),backgroundColor:css(e.v.color),borderWidth:2,pointRadius:4,pointHoverRadius:6,spanGaps:true,tension:0}))},options:baseOpts("km/h",false)}));
+    charts.push(new Chart(cv3,{type:"bar",data:{labels:bks.map(k=>bucketLabel(k,g)),datasets:[
+      {label:"Körda km (mätare)",data:odoB.map(x=>+x.toFixed(0)),backgroundColor:css("--s-none"),borderRadius:3,maxBarThickness:22},
+      {label:"Uppmätt km (Balder)",data:balB.map(x=>+x.toFixed(1)),backgroundColor:css("--good"),borderRadius:3,maxBarThickness:22}]},options:baseOpts("km",false)})); });
+  out.push(two);
+  // 3. per bil: tidsfördelning + nyckeltal
+  let h=`<table><thead><tr><th>Bil</th><th class="n">Dagar</th><th class="n">Arbetad tid</th><th style="min-width:220px">Fördelning</th>${TCATS.map(c=>`<th class="n">${c[1]}</th>`).join("")}<th class="n">Mätare km</th><th class="n">Uppmätt km</th><th class="n">km / prod.h</th><th class="n">Smoke tests</th></tr></thead><tbody>`;
+  for(const v of vs){ const dd=D.filter(d=>d.veh===v.key); if(!dd.length) continue; const tt=sum(dd,d=>d.total), ph=sum(dd,d=>d.t.prod), b=sum(dd,d=>d.balder);
+    const dist=`<div class="dist" role="img" aria-label="Tidsfördelning">${TCATS.map(c=>{ const x=sum(dd,d=>d.t[c[0]]); return x?`<i title="${c[1]}: ${nf1.format(x)} h" style="width:${100*x/tt}%;background:var(${c[2]})"></i>`:""; }).join("")}</div>`;
+    h+=`<tr><td><i class="sw" style="background:var(${v.color})"></i> ${esc(v.name)}</td><td class="n">${dd.length}</td><td class="n"><b>${nf1.format(tt)} h</b></td><td>${dist}</td>${TCATS.map(c=>`<td class="n">${nf1.format(sum(dd,d=>d.t[c[0]]))}</td>`).join("")}<td class="n">${nf0.format(sum(dd,d=>d.odo))}</td><td class="n">${nf0.format(b)}</td><td class="n">${ph?nf1.format(b/ph):"–"}</td><td class="n">${nf0.format(100*sum(dd,d=>d.smoke.filter(Boolean).length)/(dd.length*3))} %</td></tr>`; }
+  h+=`</tbody></table>`;
+  out.push(el(`<section><h2>Per bil<span class="h-sub">vald period</span></h2><div class="legend" style="margin-bottom:8px">${TCATS.map(c=>`<span><i class="sw" style="background:var(${c[2]})"></i>${c[1]}</span>`).join("")}</div><div class="tbl-wrap">${h}</div></section>`));
+  // 4. personal
+  const ppl=new Map(); for(const d of D) for(const [who,role] of [[d.driver,"förare"],[d.operator,"operatör"]]){ if(!who) continue; const k=who.trim().toUpperCase(); const p=ppl.get(k)||{k,days:0,drv:0,op:0,t:0,prod:0,rain:0,b:0,veh:new Set()}; p.days++; role==="förare"?p.drv++:p.op++; p.t+=d.total; p.prod+=d.t.prod; p.rain+=d.t.rain; p.b+=d.balder; p.veh.add(M.vehMap.get(d.veh).name); ppl.set(k,p); }
+  const pl=[...ppl.values()].sort((a,b)=>b.days-a.days||a.k.localeCompare(b.k));
+  out.push(el(`<section><h2>Personal<span class="h-sub">förare och operatörer enligt journalen</span></h2><div class="tbl-wrap"><table><thead><tr><th>Signatur</th><th>Bilar</th><th class="n">Dagar</th><th class="n">som förare</th><th class="n">som operatör</th><th class="n">Arbetad tid</th><th class="n">Produktion</th><th class="n">Regn</th><th class="n">Uppmätt km</th><th class="n">km / prod.h</th></tr></thead><tbody>${pl.map(p=>`<tr><td><b>${esc(p.k)}</b></td><td>${esc([...p.veh].join(", "))}</td><td class="n">${p.days}</td><td class="n">${p.drv}</td><td class="n">${p.op}</td><td class="n">${nf1.format(p.t)} h</td><td class="n">${nf1.format(p.prod)} h</td><td class="n">${nf1.format(p.rain)} h</td><td class="n">${nf0.format(p.b)}</td><td class="n">${p.prod?nf1.format(p.b/p.prod):"–"}</td></tr>`).join("")}</tbody></table></div><div class="muted" style="font-size:12px;margin-top:6px">Uppmätt km räknas på bilens mätning de dagar personen är med; dagar med två personer räknas för båda.</div></section>`));
+  // 5. utrustning
+  const eqKeys=Object.keys((RAW.diary||[])[0]||{}).filter(k=>k.startsWith("Eq_"));
+  const eqRows=eqKeys.map(k=>{ const name=k.slice(3); const bad=D.filter(d=>d.eqBad.some(x=>x.startsWith(name+":"))); return {name,bad}; });
+  out.push(el(`<section><h2>Utrustning<span class="h-sub">status enligt journalen</span></h2><div class="card"><div class="eqgrid">${eqRows.map(e=>`<div class="eq"><span class="badge ${e.bad.length?"b-dev":"b-fixed"}">${esc(e.name)}</span><span class="${e.bad.length?"":"muted"}">${e.bad.length?`${e.bad.length} dagar med avvikelse`:"OK alla dagar"}</span></div>`).join("")}</div></div></section>`));
+  // 6. kontroller + kommentarer
+  const flags=[];
+  const balderDays=new Map(); for(const r of M.rows){ if(!r.date||r.date<from||r.date>to||!vehOn(r.veh)||!MEASURED.has(r.st)||!M.diaryVeh.has(r.veh)) continue; const k=r.date+"|"+r.veh; balderDays.set(k,(balderDays.get(k)||0)+r.len); }
+  for(const [k,len] of balderDays){ if(!M.diaryByKey.has(k)){ const [dt,vk]=k.split("|"); flags.push({date:dt,veh:vk,typ:"Saknar körjournal",txt:`${km(len)} km uppmätt i Balder men ingen journalrad`}); } }
+  for(const d of D){
+    if(d.t.prod>=1 && d.balder<1) flags.push({date:d.date,veh:d.veh,typ:"Ingen mätning i Balder",txt:`${nf1.format(d.t.prod)} h produktion i journalen men inget uppmätt i Balder`});
+    if(d.prodKm && d.balder>0 && Math.abs(d.prodKm-d.balder)/Math.max(d.prodKm,d.balder)>0.35) flags.push({date:d.date,veh:d.veh,typ:"Avvikande km",txt:`journal ${nf0.format(d.prodKm)} km produktion, Balder ${nf0.format(d.balder)} km uppmätt`});
+    if(d.odo==null) flags.push({date:d.date,veh:d.veh,typ:"Mätarställning",txt:"Start- eller slutmätare saknas eller är orimlig"});
+    if(d.eqBad.length) flags.push({date:d.date,veh:d.veh,typ:"Utrustning",txt:d.eqBad.join(", ")});
+    if(d.lost) flags.push({date:d.date,veh:d.veh,typ:"Förlorad data",txt:[d.lost,d.lostWhy].filter(Boolean).join(" · ")}); }
+  flags.sort((a,b)=>b.date.localeCompare(a.date));
+  const notes=D.filter(d=>d.issues||d.comments).sort((a,b)=>b.date.localeCompare(a.date));
+  const tw=el(`<section><div class="two"><div><h2>Kontroller: journal mot Balder<span class="h-sub">${flags.length} st</span></h2><div class="tbl-wrap scroll"></div></div><div><h2>Problem & kommentarer<span class="h-sub">${notes.length} st</span></h2><div class="tbl-wrap scroll"></div></div></div></section>`);
+  const [f1,f2]=tw.querySelectorAll(".tbl-wrap");
+  f1.innerHTML = flags.length?`<table><tbody>${flags.map(f=>`<tr><td>${fmtDate(f.date)}</td><td>${esc(M.vehMap.get(f.veh)?.name||"")}</td><td><span class="badge ${f.typ==="Utrustning"||f.typ==="Förlorad data"?"b-dev":"b-open"}">${esc(f.typ)}</span></td><td style="white-space:normal">${esc(f.txt)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Journal och Balder stämmer överens i perioden.</div>`;
+  f2.innerHTML = notes.length?`<table><tbody>${notes.map(d=>`<tr><td>${fmtDate(d.date)}</td><td>${esc(M.vehMap.get(d.veh)?.name||"")}</td><td style="white-space:normal">${esc([d.issues,d.comments].filter(Boolean).join(" · "))}${d.assign?` <span class="muted">· ${esc(d.assign)}</span>`:""}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Inga noterade problem i perioden.</div>`;
+  out.push(tw);
+  // 7. journalrader (invikt)
+  const open=recall("jlOpen",false);
+  const rows=D.slice().sort((a,b)=>b.date.localeCompare(a.date)||M.vehMap.get(a.veh).name.localeCompare(M.vehMap.get(b.veh).name,"sv",{numeric:true}));
+  const ck=b=>b?'<span class="ok">✓</span>':'<span class="muted">–</span>';
+  const jl=el(`<section><details class="fold" ${open?"open":""}><summary><span class="sum-t">Journalrader</span><span class="h-sub">${rows.length} rader · ${nf0.format(T)} h · ${nf0.format(odo)} km enligt mätare</span></summary>
+    <div class="tbl-wrap" style="margin-top:10px"><table><thead><tr><th>Datum</th><th>Bil</th><th>Förare / op.</th><th>Uppdrag</th><th class="n">Mätare</th><th class="n">km</th><th class="n">Prod.km</th><th class="n">Uppmätt</th>${TCATS.map(c=>`<th class="n">${c[1]}</th>`).join("")}<th class="n">Smoke</th><th>Kommentar</th></tr></thead><tbody>
+    ${rows.map(d=>{ return `<tr><td>${fmtDate(d.date)}</td><td>${esc(M.vehMap.get(d.veh).name)}</td><td>${esc(d.driver)}${d.operator?" / "+esc(d.operator):""}</td><td>${esc(d.assign)}</td><td class="n muted">${d.startOdo!=null?nf0.format(d.startOdo)+"–"+nf0.format(d.endOdo):""}</td><td class="n">${d.odo!=null?nf0.format(d.odo):"–"}</td><td class="n">${d.prodKm?nf0.format(d.prodKm):"–"}</td><td class="n"><b>${nf0.format(d.balder)}</b></td>${TCATS.map(c=>`<td class="n">${d.t[c[0]]?nf1.format(d.t[c[0]]):'<span class="muted">–</span>'}</td>`).join("")}<td class="n">${d.smoke.map(ck).join(" ")}</td><td style="white-space:normal;min-width:240px">${esc([d.issues,d.comments,...d.eqBad].filter(Boolean).join(" · "))}</td></tr>`; }).join("")}
+    </tbody></table></div></details></section>`);
+  jl.querySelector("details").addEventListener("toggle",e=>store("jlOpen",e.target.open));
+  out.push(jl);
+  return out;
+}
+
 function orderName(i){ return i==null?"Okänt mätområde":ORDERS[i].name; }
 
-function secDayLog(P){
-  const sec=el(`<section><div class="toolbar"><h2>Dagslogg<span class="h-sub">körda mätsträckor per datum och bil · klicka för detaljer</span></h2>
-    <div class="fgroup"><label class="ink2" style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" data-x="plan"> Visa även ej körda dagar</label><button data-x="csv">Exportera CSV</button></div></div><div class="tbl-wrap"></div></section>`);
+function diaryCell(j){
+  if(!j) return '<span class="muted">–</span>';
+  const parts=[`${esc(j.driver)}${j.operator?"/"+esc(j.operator):""}`, `prod ${nf1.format(j.t.prod)} h`];
+  if(j.t.rain) parts.push(`regn ${nf1.format(j.t.rain)} h`); if(j.t.tech) parts.push(`tekn. ${nf1.format(j.t.tech)} h`);
+  if(j.odo!=null) parts.push(`${nf0.format(j.odo)} km mätare`);
+  const txt=[j.issues,j.comments,...j.eqBad].filter(Boolean).join(" · ");
+  return `<span class="ink2">${parts.join(" · ")}</span>${txt?`<div class="jtxt">${esc(txt)}</div>`:""}`;
+}
+
+function secDayLog(P,D){
+  const sec=el(`<section><details class="fold" ${recall("dlOpen",false)?"open":""}><summary><span class="sum-t">Dagslogg</span><span class="h-sub dl-sum"></span></summary><div class="toolbar" style="margin-top:10px"><span class="ink2" style="font-size:12.5px">Körda mätsträckor per datum och bil · klicka på en rad för detaljer</span>
+    <div class="fgroup"><label class="ink2" style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" data-x="plan"> Visa även ej körda dagar</label><button data-x="csv">Exportera CSV</button></div></div><div class="tbl-wrap"></div></details></section>`);
+  sec.querySelector("details").addEventListener("toggle",e=>store("dlOpen",e.target.open));
   const showPlan=recall("dlPlan",false); sec.querySelector('[data-x="plan"]').checked=showPlan;
   sec.querySelector('[data-x="plan"]').onchange=e=>{ store("dlPlan",e.target.checked); render(); };
   const byDV=new Map(); for(const r of P){ const k=r.date+"|"+r.veh; (byDV.get(k)||byDV.set(k,[]).get(k)).push(r); }
@@ -581,17 +756,18 @@ function secDayLog(P){
       lines.push([r.date,vname(r.veh),r.mid,r.sid,o?o.name:"",o?(LAN[o.lan]||o.lan):"",nf1.format(r.len/1000),STATUS_LBL[r.st]||r.st,r.fault?.label||"",(r.note||"").replace(/[;\n\r]/g," ")].map(x=>String(x)).join(";")); }
     const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}); const a=document.createElement("a");
     const [f,t]=periodRange(); a.href=URL.createObjectURL(blob); a.download=`korda_matstrackor_${f}_${t}.csv`; document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); };
+  sec.querySelector(".dl-sum").textContent=`${list.length} bil-dagar · ${km(list.reduce((a,d)=>a+d.m.reduce((x,r)=>x+r.len,0),0))} km · ${list.reduce((a,d)=>a+d.m.length,0)} mätsträckor`;
   if(!list.length){ sec.querySelector(".tbl-wrap").innerHTML=`<div class="empty">Inga körda mätsträckor i vald period.</div>`; return sec; }
-  let h=`<table class="daylog"><thead><tr><th>Datum</th><th>Bil</th><th class="n">Uppmätt km</th><th class="n">Antal</th><th>Körda mätsträckor</th><th class="n">Avvik.</th></tr></thead><tbody>`;
+  let h=`<table class="daylog"><thead><tr><th>Datum</th><th>Bil</th><th class="n">Uppmätt km</th><th class="n">Antal</th><th>Körda mätsträckor</th><th class="n">Avvik.</th><th>Körjournal</th></tr></thead><tbody>`;
   for(const d of list){ const v=M.vehMap.get(d.veh); const dev=d.rs.filter(r=>r.st==="deviated");
     const ids=d.m.slice().sort((a,b)=>a.seq-b.seq).map(r=>`<code title="${esc(orderName(r.order))} · ${km(r.len)} km">${esc(r.mid)}</code>`).join("");
-    h+=`<tr class="click" data-k="${esc(d.k)}" tabindex="0" aria-expanded="false"><td>${fmtDate(d.date)}</td><td><i class="sw" style="background:var(${v.color})"></i> ${esc(v.name)}</td><td class="n"><b>${km(d.m.reduce((a,r)=>a+r.len,0))}</b></td><td class="n">${d.m.length}${d.rs.length>d.m.length?`<span class="muted"> / ${d.rs.length}</span>`:""}</td><td class="ids">${ids||'<span class="muted">–</span>'}</td><td class="n">${dev.length||'<span class="muted">0</span>'}</td></tr>`; }
+    h+=`<tr class="click" data-k="${esc(d.k)}" tabindex="0" aria-expanded="false"><td>${fmtDate(d.date)}</td><td><i class="sw" style="background:var(${v.color})"></i> ${esc(v.name)}</td><td class="n"><b>${km(d.m.reduce((a,r)=>a+r.len,0))}</b></td><td class="n">${d.m.length}${d.rs.length>d.m.length?`<span class="muted"> / ${d.rs.length}</span>`:""}</td><td class="ids">${ids||'<span class="muted">–</span>'}</td><td class="n">${dev.length||'<span class="muted">0</span>'}</td><td class="jr">${diaryCell(M.diaryByKey.get(d.k))}</td></tr>`; }
   h+=`</tbody></table>`;
   const wrap=sec.querySelector(".tbl-wrap"); wrap.innerHTML=h;
   const toggle=tr=>{ const nx=tr.nextElementSibling; if(nx&&nx.classList.contains("detail")){ nx.remove(); tr.setAttribute("aria-expanded","false"); return; }
     const rs=byDV.get(tr.dataset.k).slice().sort((a,b)=>a.seq-b.seq);
     const inner=`<div class="inner"><table><thead><tr><th>Mätsträcka_id</th><th>Mätområde</th><th class="n">km</th><th>Status</th><th>Felkod / notering</th></tr></thead><tbody>${rs.map(r=>`<tr><td><code>${esc(r.mid)}</code>${r.sc?' <span class="muted">(egenkontroll)</span>':""}</td><td>${esc(orderName(r.order))}</td><td class="n">${km(r.len)}</td><td><span class="badge ${MEASURED.has(r.st)?"b-measured":r.st==="deviated"?"b-dev":"b-plan"}">${esc(STATUS_LBL[r.st]||r.st)}</span></td><td>${esc([r.fault?.label,r.note].filter(Boolean).join(" · "))}</td></tr>`).join("")}</tbody></table></div>`;
-    const d=document.createElement("tr"); d.className="detail"; d.innerHTML=`<td colspan="6">${inner}</td>`; tr.after(d); tr.setAttribute("aria-expanded","true"); };
+    const d=document.createElement("tr"); d.className="detail"; d.innerHTML=`<td colspan="7">${inner}</td>`; tr.after(d); tr.setAttribute("aria-expanded","true"); };
   wrap.querySelectorAll("tr.click").forEach(tr=>{ tr.onclick=e=>{ if(window.getSelection().toString()) return; toggle(tr); }; tr.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(tr); } }; });
   return sec;
 }
@@ -611,10 +787,11 @@ function secOrders(P){
     <div class="olist"></div></section>`);
   const periodBy=new Map(); const seen=new Set();
   for(const r of P){ if(!MEASURED.has(r.st)||r.order==null||r.sc||seen.has(r.sid)) continue; const a=M.segAgg.get(r.sid); if(a.mDate!==r.date) continue; seen.add(r.sid); periodBy.set(r.order,(periodBy.get(r.order)||0)+a.len); }
-  const items=M.ordStats.map(s=>{ const m=Math.min(s.meas,s.o.total); return {o:s.o,m,t:s.o.total,rem:Math.max(0,s.o.total-m),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan:LAN[s.o.lan]||("Län "+s.o.lan)}; });
+  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(s.meas,s.o.total); return {o:s.o,m,t:s.o.total,rem:Math.max(0,s.o.total-m),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan:LAN[s.o.lan]||("Län "+s.o.lan)}; });
   const lanSel=sec.querySelector('[data-f="lan"]');
   [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
   const ctl=k=>sec.querySelector(`[data-f="${k}"]`);
+  if(!S.incKM){ F.typ=""; ctl("typ").hidden=true; }
   ["q","lan","typ","status","sort"].forEach(k=>{ ctl(k).value=F[k]; });
   const dirBtn=ctl("dir");
   const draw=()=>{
@@ -665,7 +842,7 @@ function secDeviations(P){
 
 function secAhead(){
   const T=todayStr(); const end=ymd(addDays(new Date(),13));
-  const rs=M.rows.filter(r=>r.date&&r.date>=T&&r.date<=end&&r.st==="planned"&&vehOn(r.veh));
+  const rs=ROWS().filter(r=>r.date&&r.date>=T&&r.date<=end&&r.st==="planned"&&vehOn(r.veh));
   const sec=el(`<section><h2>Planerat framåt<span class="h-sub">ej uppmätta sträckor kommande 14 dagar</span></h2><div class="tbl-wrap"></div></section>`);
   if(!rs.length){ sec.querySelector(".tbl-wrap").innerHTML=`<div class="empty">Inget planerat de kommande 14 dagarna.</div>`; return sec; }
   const vs=M.vlist.filter(v=>vehOn(v.key)&&rs.some(r=>r.veh===v.key));
@@ -699,10 +876,12 @@ function startRealtime(){
     const sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:false,autoRefreshToken:false}});
     sb.channel("uppfoljning").on("postgres_changes",{event:"*",schema:"public",table:"work_day_segments"},scheduleReload)
       .on("postgres_changes",{event:"*",schema:"public",table:"work_days"},scheduleReload)
+      .on("postgres_changes",{event:"*",schema:"public",table:"road_survey_diary"},scheduleReload)
       .subscribe(st=>{ rtState = st==="SUBSCRIBED"?"on":"off"; setLive(); });
   }catch(e){ console.warn("Realtime ej tillgängligt",e); }
 }
 $("#refreshBtn").onclick=()=>loadAll();
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ TAB=b.dataset.tab; store("tab",TAB); render(); window.scrollTo({top:0}); });
 setInterval(()=>{ if(!document.hidden) loadAll(); }, CFG.pollMinutes*60000);
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden && lastLoad && Date.now()-lastLoad>60000) loadAll(); });
 // rita om vid dygnsbyte så "Idag" stämmer
