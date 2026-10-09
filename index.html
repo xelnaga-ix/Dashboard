@@ -4,192 +4,272 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mätuppföljning 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
+/* Layout: arbetsyta med huvudkolumn + smal sidokolumn för mätområden. Ljus först, mörk som eget tema. */
 :root{
   color-scheme:light;
-  --page:#f9f9f7; --surface:#fcfcfb; --surface-2:#f2f1ed; --border:rgba(11,11,11,.10);
-  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
-  --accent:#2a78d6; --accent-soft:rgba(42,120,214,.12);
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948; --s-none:#a8a7a1;
-  --good:#0ca30c; --good-text:#006300; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
-  --track:#e7e6e1;
+  --page:#f3f4f2; --surface:#ffffff; --surface-2:#f6f7f5; --hover:#eef0ec;
+  --line:#e3e5e0; --line-strong:#cfd2cb;
+  --ink:#16191c; --ink-2:#4b5157; --muted:#858b90;
+  --accent:#1d2328; --accent-ink:#ffffff; --focus:#2a78d6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948; --s-none:#a6aaa4;
+  --good:#1e8e3e; --good-soft:#e6f4ea; --good-text:#17702f;
+  --warn:#c98500; --warn-soft:#fdf3dc;
+  --crit:#c93a3a; --crit-soft:#fbe9e9;
+  --track:#e8eae6;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#232321; --border:rgba(255,255,255,.10);
-    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
-    --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
-    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s-none:#6b6a66;
-    --good-text:#0ca30c; --track:#2c2c2a;
-  }
-}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --page:#121416; --surface:#1a1d20; --surface-2:#202327; --hover:#25292d;
+  --line:#2a2e33; --line-strong:#383d43;
+  --ink:#eef0f1; --ink-2:#b4b9bd; --muted:#80868b;
+  --accent:#eef0f1; --accent-ink:#121416; --focus:#5a9cec;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#2f9a2f; --s7:#9085e9; --s8:#e66767; --s-none:#62676c;
+  --good:#3fb15b; --good-soft:rgba(63,177,91,.14); --good-text:#5cc775;
+  --warn:#e0a526; --warn-soft:rgba(224,165,38,.14);
+  --crit:#e56565; --crit-soft:rgba(229,101,101,.14);
+  --track:#2a2e33;
+}}
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --page:#0d0d0d; --surface:#1a1a19; --surface-2:#232321; --border:rgba(255,255,255,.10);
-  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
-  --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s-none:#6b6a66;
-  --good-text:#0ca30c; --track:#2c2c2a;
+  --page:#121416; --surface:#1a1d20; --surface-2:#202327; --hover:#25292d;
+  --line:#2a2e33; --line-strong:#383d43;
+  --ink:#eef0f1; --ink-2:#b4b9bd; --muted:#80868b;
+  --accent:#eef0f1; --accent-ink:#121416; --focus:#5a9cec;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#2f9a2f; --s7:#9085e9; --s8:#e66767; --s-none:#62676c;
+  --good:#3fb15b; --good-soft:rgba(63,177,91,.14); --good-text:#5cc775;
+  --warn:#e0a526; --warn-soft:rgba(224,165,38,.14);
+  --crit:#e56565; --crit-soft:rgba(229,101,101,.14);
+  --track:#2a2e33;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1400px;margin:0 auto;padding:0 16px 48px}
-header.top{position:sticky;top:0;z-index:20;background:var(--page);border-bottom:1px solid var(--border)}
-.top-in{max-width:1400px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.title h1{font-size:18px;margin:0;font-weight:650;letter-spacing:-.01em}
-.title .sub{color:var(--ink-2);font-size:12.5px}
-.live{display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:12.5px;flex-wrap:wrap}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;vertical-align:1px}
-.dot.on{background:var(--good);box-shadow:0 0 0 3px rgba(12,163,12,.18)}
+body{background:var(--page);color:var(--ink);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.muted{color:var(--muted)} .ink2{color:var(--ink-2)} .ok{color:var(--good-text)}
+.n{text-align:right;font-variant-numeric:tabular-nums}
+
+/* Topp */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1640px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;gap:28px;min-height:56px}
+.title{display:flex;flex-direction:column;justify-content:center}
+.title h1{font-size:16px;margin:0;font-weight:600;letter-spacing:-.005em}
+.title .sub{color:var(--muted);font-size:12px}
+.tabs{display:flex;gap:4px;align-items:stretch;margin:0;border:none}
+.tabs button{border:none;background:none;padding:0 12px;font-weight:500;color:var(--ink-2);border-bottom:2px solid transparent;border-top:2px solid transparent;cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.live{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}
+#liveState{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.on{background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
 .dot.err{background:var(--crit)}
-button,.btn{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer}
-button:hover{background:var(--surface-2)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 0 6px}
-.fgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.flabel{font-size:12px;color:var(--muted);margin-right:2px;text-transform:uppercase;letter-spacing:.04em}
-.chip{border-radius:999px;padding:5px 11px;font-size:13px;background:var(--surface);border:1px solid var(--border);color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.chip[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);border-color:var(--accent)}
-.sw{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
-input[type=date]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 8px}
-.range-note{color:var(--ink-2);font-size:13px;padding:2px 0 10px}
-section{margin-top:18px}
-h2{font-size:15px;margin:0 0 10px;font-weight:650}
-h2 .h-sub{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:8px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
-.grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.kpi .lbl{color:var(--ink-2);font-size:12.5px}
-.kpi .val{font-size:26px;font-weight:650;letter-spacing:-.02em;margin-top:2px}
-.kpi .val small{font-size:14px;color:var(--ink-2);font-weight:500;margin-left:3px}
-.kpi .foot{color:var(--muted);font-size:12px;margin-top:2px}
-.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px}
-@media (max-width:900px){.hero{grid-template-columns:1fr}}
-.bigbar{height:14px;border-radius:7px;background:var(--track);overflow:hidden;display:flex;margin:12px 0 8px}
-.bigbar span{display:block;height:100%}
-.hero .num{font-size:34px;font-weight:700;letter-spacing:-.02em}
-.hero .num small{font-size:16px;color:var(--ink-2);font-weight:500}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:6px}
-.stat .l{color:var(--ink-2);font-size:12.5px}.stat .v{font-size:18px;font-weight:650}
-.stat .v.ok{color:var(--good-text)} .stat .v.bad{color:var(--crit)}
-.chartbox{position:relative;height:300px}
-.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--grid);white-space:nowrap}
-th{font-weight:600;color:var(--ink-2);font-size:12px;background:var(--surface);position:sticky;top:0}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
-tr:last-child td{border-bottom:none}
-tr.total td{font-weight:650;background:var(--surface-2)}
-tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
-tr.detail td{background:var(--surface-2);white-space:normal;padding:0}
-.inner{padding:8px 12px 12px}
-.inner table{background:var(--surface);border:1px solid var(--border);border-radius:8px}
-.muted{color:var(--muted)} .ink2{color:var(--ink-2)}
-.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.vcard h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
-.vcard .reg{color:var(--muted);font-weight:400;font-size:12.5px}
-.vcard .big{font-size:28px;font-weight:700;margin:8px 0 2px;letter-spacing:-.02em}
-.vcard .big small{font-size:14px;color:var(--ink-2);font-weight:500}
-.vcard dl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:10px 0 0;font-size:13px}
-.vcard dt{color:var(--ink-2)} .vcard dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.spark{display:flex;align-items:flex-end;gap:2px;height:36px;margin-top:10px}
-.spark i{flex:1;border-radius:2px 2px 0 0;min-height:1px;background:var(--track)}
-.ord-county{margin-bottom:10px}
-.prow{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,auto);gap:4px 16px;padding:9px 12px;border-top:1px solid var(--grid);align-items:center}
-.prow:first-child{border-top:none}
-.prow .nm{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.prow .nm .tag{font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--ink-2);margin-left:6px}
-.prow .fig{text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
-.prow .fig b{color:var(--ink)} .prow .fig span{color:var(--muted)}
-.pbar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--track);overflow:hidden;display:flex}
-.pbar i{display:block;height:100%}
-.chead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;background:var(--surface-2);border-radius:12px 12px 0 0;font-weight:650}
-.chead .fig{font-weight:500;color:var(--ink-2);font-variant-numeric:tabular-nums;font-size:13px}
-.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
-@media (max-width:900px){.two{grid-template-columns:1fr}}
-.hbar{display:grid;grid-template-columns:150px minmax(0,1fr) 70px;gap:8px;align-items:center;font-size:13px;padding:4px 0}
-.hbar .tr{height:10px;border-radius:5px;background:var(--track);overflow:hidden}
-.hbar .tr i{display:block;height:100%;border-radius:5px;background:var(--accent)}
-.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--border);color:var(--ink-2)}
-.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bc,var(--muted))}
-.b-measured{--bc:var(--good)} .b-dev{--bc:var(--crit)} .b-plan{--bc:var(--muted)} .b-fixed{--bc:var(--good)} .b-open{--bc:var(--serious)}
-.banner{margin-top:12px;padding:10px 14px;border-radius:10px;border:1px solid var(--warn);background:rgba(250,178,25,.10);font-size:13px}
-.banner.err{border-color:var(--crit);background:rgba(208,59,59,.10)}
-.loading{padding:60px 0;text-align:center;color:var(--ink-2)}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.iconbtn{width:32px;height:32px;display:inline-grid;place-items:center;border:1px solid transparent;border-radius:8px;background:none;color:var(--ink-2);cursor:pointer}
+.iconbtn:hover{background:var(--hover);color:var(--ink)}
+.iconbtn svg{width:16px;height:16px}
+
+/* Filterrad */
+.wrap{max-width:1640px;margin:0 auto;padding:0 24px 48px}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding:16px 0 4px}
+.fgroup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.flabel{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px}
+.seg button{border:none;background:none;border-radius:6px;padding:4px 10px;font-size:13px;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.seg button:hover{background:var(--hover);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sel{appearance:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23858b90' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center;border:1px solid var(--line);border-radius:8px;padding:5px 28px 5px 10px;font-size:13px;color:var(--ink);cursor:pointer}
+.sel.on{border-color:var(--ink);font-weight:500}
+input[type=date],input[type=search]{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:13px}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none}
+.switch input{appearance:none;width:30px;height:18px;border-radius:9px;background:var(--line-strong);position:relative;cursor:pointer;margin:0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{transform:translateX(12px);background:var(--accent-ink)}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+.range-note{color:var(--muted);font-size:12.5px;padding:2px 0 4px}
+
+/* Struktur */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.main{min-width:0}
+.side{position:sticky;top:72px;max-height:calc(100vh - 88px);overflow-y:auto;margin-top:20px}
+@media (max-width:1150px){.layout{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:none}}
+section{margin-top:28px}
+.main>section:first-child{margin-top:20px}
+h2{font-size:14px;font-weight:600;margin:0 0 10px;letter-spacing:-.003em}
+h2 .h-sub,.h-sub{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:8px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .toolbar h2{margin:0}
-.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.seg button{border:none;border-radius:0;padding:5px 10px;font-size:13px;color:var(--ink-2);background:var(--surface)}
-.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink)}
-.empty{color:var(--muted);padding:18px;text-align:center}
-.ofilters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-.ofilters input,.ofilters select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 9px}
-.ofilters input{min-width:200px;flex:0 1 240px}
-.ofilters button{font-size:13px}
-.ocount{font-size:12.5px;margin-left:auto}
-td.ids{white-space:normal;line-height:1.9;min-width:320px}
-code{font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;margin:0 4px 0 0;display:inline-block;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.two>*{min-width:0}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.empty{color:var(--muted);padding:20px;text-align:center;font-size:13px}
+.loading{padding:80px 0;text-align:center;color:var(--muted)}
+footer{color:var(--muted);font-size:12px;margin-top:40px;line-height:1.6;max-width:110ch}
+.banner{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--warn-soft);color:var(--ink);font-size:13px}
+.banner.err{background:var(--crit-soft)}
+
+/* Säsong */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.hero>.card{border:none;background:none;border-radius:0;padding:20px 22px}
+.hero>.card+.card{border-left:1px solid var(--line)}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}.hero>.card+.card{border-left:none;border-top:1px solid var(--line)}}
+.hero .ink2{font-size:12px!important;color:var(--muted)}
+.hero .num{font-size:32px;font-weight:600;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+.hero .num small{font-size:14px;color:var(--ink-2);font-weight:400;margin-left:4px;letter-spacing:0}
+.bigbar{height:8px;border-radius:4px;background:var(--track);overflow:hidden;display:flex;margin:14px 0 10px}
+.bigbar span{display:block;height:100%}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-top:10px}
+.stat .l{color:var(--muted);font-size:12px}
+.stat .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.planline{display:flex;align-items:center;gap:10px;margin-top:6px}
+.planline .pd{font-size:24px;font-weight:600;letter-spacing:-.015em}
+.stat .v.ok{color:var(--good-text)} .stat .v.bad{color:var(--crit)}
+
+/* Nyckeltal: en panel med celler */
+.grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.grid-kpi .card.kpi{border:none;border-radius:0;background:none;padding:14px 18px;box-shadow:-1px 0 0 var(--line),0 -1px 0 var(--line)}
+.kpi .lbl{color:var(--muted);font-size:12px}
+.kpi .val{font-size:22px;font-weight:600;letter-spacing:-.015em;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:13px;color:var(--ink-2);font-weight:400;margin-left:3px;letter-spacing:0}
+.kpi .foot{color:var(--muted);font-size:12px;margin-top:2px}
+
+.grid-kpi.kpi4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:800px){.grid-kpi.kpi4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Diagram */
+.chartbox{position:relative;height:280px}
+
+/* Tabeller */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.tbl-wrap.scroll{max-height:440px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:12px;background:var(--surface);position:sticky;top:0;z-index:1}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface-2)}
+tr.total td{font-weight:600;background:var(--surface-2)}
+tr.click{cursor:pointer}
+tr.detail td{background:var(--surface-2);white-space:normal;padding:0}
+tr.detail:hover td{background:var(--surface-2)}
+.inner{padding:10px 14px 14px}
+.inner table{background:var(--surface);border:1px solid var(--line);border-radius:8px}
 .daylog td{vertical-align:top}
+td.ids{white-space:normal;line-height:1.9;min-width:300px}
 td.jr{white-space:normal;min-width:220px;font-size:12.5px}
 .jtxt{color:var(--muted);font-size:12px;margin-top:2px}
-.tbl-wrap.scroll{max-height:440px;overflow-y:auto}
-.wrap,.top-in{max-width:1680px!important}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-top:12px}
-.tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;padding:9px 14px;font-weight:600;color:var(--ink-2)}
-.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
-.main{min-width:0}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
-.side{position:sticky;top:72px;max-height:calc(100vh - 84px);overflow-y:auto;padding-right:2px}
-.side section{margin-top:18px}
-.side .prow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
-.side .prow .fig{text-align:left;font-size:12px}
-.side .ofilters{gap:6px}
-.side .ofilters input{flex:1 1 100%;min-width:0}
-.side .ofilters select{flex:1 1 45%;min-width:0}
-.side .ocount{margin-left:0;flex:1 1 100%}
-.side .chead{padding:8px 10px;font-size:13.5px;flex-wrap:wrap}
-@media (max-width:1150px){.layout{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:none}}
-details.fold>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:4px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+code{font:12px/1.4 var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin:0 4px 0 0;display:inline-block;white-space:nowrap;color:var(--ink-2)}
+
+/* Märken */
+.badge{display:inline-flex;align-items:center;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.b-measured,.b-fixed{background:var(--good-soft);color:var(--good-text)}
+.b-dev{background:var(--crit-soft);color:var(--crit)}
+.b-open{background:var(--warn-soft);color:var(--ink)}
+.b-plan{background:var(--surface-2);color:var(--muted)}
+.tag{font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--muted);margin-left:4px}
+
+/* Bilar */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.vcard{display:flex;flex-direction:column}
+.vcard h3{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.vcard .reg{color:var(--muted);font-weight:400;font-size:12px}
+.vcard .big{font-size:26px;font-weight:600;margin:10px 0 0;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.vcard .big small{font-size:13px;color:var(--ink-2);font-weight:400;letter-spacing:0}
+.vcard .vsub{color:var(--muted);font-size:12px}
+.vcard dl{display:grid;grid-template-columns:1fr auto;gap:5px 12px;margin:14px 0 0;font-size:12.5px;padding-top:12px;border-top:1px solid var(--line)}
+.vcard dt{color:var(--muted)} .vcard dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.spark{display:flex;align-items:flex-end;gap:2px;height:32px;margin-top:auto;padding-top:14px}
+.spark i{flex:1;border-radius:2px 2px 0 0;min-height:2px;background:var(--track)}
+.spark-l{color:var(--muted);font-size:11px;margin-top:4px}
+
+/* Hopfällbara sektioner */
+details.fold>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:2px;padding:10px 0;border-bottom:1px solid var(--line);user-select:none}
 details.fold>summary::-webkit-details-marker{display:none}
-details.fold>summary::before{content:"▸";color:var(--muted);margin-right:6px;transition:transform .15s}
-details.fold[open]>summary::before{transform:rotate(90deg)}
-.sum-t{font-weight:650;font-size:15px}
-.dist{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--track);gap:2px}
+details.fold>summary::before{content:"";width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(-45deg);margin:0 12px 0 2px;align-self:center;transition:transform .15s}
+details.fold[open]>summary::before{transform:rotate(45deg)}
+details.fold>summary:hover .sum-t{text-decoration:underline;text-underline-offset:3px}
+details.fold[open]>summary{border-bottom-color:transparent}
+.sum-t{font-weight:600;font-size:14px}
+details.fold.sub>summary{padding:8px 0;border-bottom:none}
+details.fold.sub .sum-t{font-size:13px;font-weight:500}
+
+/* Avvikelser per felkod */
+.hbar{display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;padding:5px 0}
+.hbar .tr{height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:3px;background:var(--crit)}
+
+/* Mätområden (sidokolumn) */
+.mo{margin-top:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 8px}
+.mo-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.mo-head h2{margin:0}
+.mo-tot{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.mo-ctl{display:flex;gap:6px;margin-bottom:8px}
+.mo-ctl input[type=search]{flex:1 1 auto;min-width:0;font-size:12.5px;padding:5px 8px}
+.mo-ctl .sel{font-size:12.5px;padding:5px 26px 5px 8px;min-width:0;flex:1 1 0}
+.mo-ctl button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 9px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.mo-ctl button:hover{background:var(--hover)}
+.mo-ctl button.on{border-color:var(--ink);color:var(--ink)}
+.mo-list{margin-top:4px}
+.mg{padding:6px 0;border-top:1px solid var(--line)}
+.mg:first-child{border-top:none}
+.mgh,.mr{display:grid;grid-template-columns:minmax(0,1fr) 52px 38px;gap:10px;align-items:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mgh{font-size:13px;font-weight:600;padding:4px 0}
+.mr{font-size:12.5px;padding:3px 0 3px 10px;border-radius:6px;cursor:default}
+.mr:hover{background:var(--surface-2)}
+.mn{overflow:hidden;text-overflow:ellipsis}
+.mr .mn{color:var(--ink-2)}
+.mp{text-align:right;font-size:12px}
+.mr .mp{color:var(--ink-2)}
+.mb{height:4px;border-radius:2px;background:var(--track);overflow:hidden}
+.mb i{display:block;height:100%;background:var(--good);border-radius:2px}
+.mr.done .mn,.mr.done .mp{color:var(--muted)}
+.mr.done .mb i{background:var(--line-strong)}
+
+/* Körjournal */
+.dist{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--track);gap:1px}
 .dist i{display:block;height:100%}
-.eqgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.eq{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:12.5px}
-details.fold.sub>summary{padding:9px 12px}
-details.fold.sub .sum-t{font-size:13.5px}
-.ok{color:var(--good-text)}
-footer{color:var(--muted);font-size:12px;margin-top:28px;line-height:1.6}
-@media (max-width:600px){.prow{grid-template-columns:1fr}.prow .fig{text-align:left}.hbar{grid-template-columns:110px 1fr 60px}}
+.eqgrid{display:flex;flex-wrap:wrap;gap:8px}
+.eq{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 10px;border:1px solid var(--line);border-radius:8px}
+.eq .badge{padding:0;background:none}
+.eq .badge.b-fixed{color:var(--ink)} .eq .badge.b-dev{color:var(--crit)}
+
+@media (max-width:700px){
+  .top-in{padding:0 16px;flex-wrap:wrap;gap:0 16px}
+  .tabs{order:3;width:100%;min-height:40px}
+  .wrap{padding:0 16px 40px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <div class="title"><h1 id="ttl">Mätuppföljning</h1><div class="sub" id="subttl">Road Plan 2026 · läser direkt från Balder</div></div>
+  <div class="title"><h1 id="ttl">Mätuppföljning</h1><div class="sub" id="subttl">Road Plan 2026</div></div>
+  <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="matning">Mätning</button><button role="tab" data-tab="journal">Körjournal</button></nav>
   <div class="live">
     <span id="liveState"><span class="dot"></span>Ansluter…</span>
     <span id="updated"></span>
-    <button id="refreshBtn" title="Hämta om all data">Uppdatera</button>
-    <button id="themeBtn" title="Byt ljust/mörkt läge" aria-label="Byt tema">Ljust/mörkt</button>
+    <button class="iconbtn" id="refreshBtn" title="Hämta om all data" aria-label="Uppdatera"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M12.5 1.8v2.6H9.9"/></svg></button>
+    <button class="iconbtn" id="themeBtn" title="Byt mellan ljust och mörkt" aria-label="Byt tema"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11a5.5 5.5 0 0 0 0-11z" fill="currentColor"/></svg></button>
   </div>
 </div></header>
 
 <div class="wrap">
   <div id="banners"></div>
-  <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="matning">Mätuppföljning</button><button role="tab" data-tab="journal">Körjournal</button></nav>
   <div class="filters" id="filters">
-    <div class="fgroup" id="periodChips"><span class="flabel">Period</span></div>
-    <div class="fgroup" id="customRange" hidden>
-      <input type="date" id="dFrom" aria-label="Från datum"> – <input type="date" id="dTo" aria-label="Till datum">
-    </div>
-    <div class="fgroup" id="vehChips"><span class="flabel">Bilar</span></div>
-    <div class="fgroup" id="kmGroup"><span class="flabel">KM</span><button class="chip" id="kmChip" title="Kontrollmätningar ersätts inte och är därför exkluderade som standard"></button></div>
+    <div class="fgroup"><div class="seg" id="periodSeg" role="group" aria-label="Period"></div>
+      <select class="sel" id="periodMore" aria-label="Annan period"></select>
+      <span id="customRange" hidden><input type="date" id="dFrom" aria-label="Från datum"> – <input type="date" id="dTo" aria-label="Till datum"></span></div>
+    <div class="fgroup"><div class="seg" id="vehSeg" role="group" aria-label="Bilar"></div></div>
+    <label class="switch" id="kmGroup" title="Kontrollmätningar ersätts inte och räknas därför inte med som standard"><input type="checkbox" id="kmChk"> Inkludera kontrollmätningar</label>
   </div>
   <div class="range-note" id="rangeNote"></div>
 
@@ -446,22 +526,26 @@ const ORD_OK = o => S.incKM || !o.km;
 const ROWS = () => S.incKM ? M.rows : M.rows.filter(r=>!r.km);
 const vehOn = k => S.veh.size===0 || S.veh.has(k);
 
+const QUICK=["today","week","month","season"];
 function buildFilters(){
-  const kc=$("#kmChip"); kc.setAttribute("aria-pressed",S.incKM); kc.textContent=S.incKM?"Kontrollmätningar inkluderade":"Exkl. kontrollmätningar";
-  kc.onclick=()=>{ S.incKM=!S.incKM; store("incKM",S.incKM); buildFilters(); render(); };
-  const pc=$("#periodChips"); pc.querySelectorAll(".chip").forEach(c=>c.remove());
-  for(const p of PERIODS){ const b=document.createElement("button"); b.className="chip"; b.textContent=p.l; b.setAttribute("aria-pressed",S.period===p.k);
-    b.onclick=()=>{ S.period=p.k; store("period",p.k); if(p.k==="custom"){ const [f,t]=periodRange(); S.from=f; S.to=t; } buildFilters(); render(); }; pc.appendChild(b); }
+  const kc=$("#kmChk"); kc.checked=S.incKM; kc.onchange=()=>{ S.incKM=kc.checked; store("incKM",S.incKM); render(); };
+  const ps=$("#periodSeg"); ps.innerHTML="";
+  for(const k of QUICK){ const p=PERIODS.find(x=>x.k===k); const b=document.createElement("button"); b.textContent=p.l.replace("Denna ","").replace("Hela säsongen","Säsong").replace(/^./,c=>c.toUpperCase()); b.setAttribute("aria-pressed",S.period===k);
+    b.onclick=()=>{ S.period=k; store("period",k); buildFilters(); render(); }; ps.append(b); }
+  const pm=$("#periodMore"); pm.innerHTML=""; const others=PERIODS.filter(p=>!QUICK.includes(p.k));
+  pm.append(new Option("Annan period…","")); others.forEach(p=>pm.append(new Option(p.l,p.k)));
+  pm.value=QUICK.includes(S.period)?"":S.period; pm.classList.toggle("on",!QUICK.includes(S.period));
+  pm.onchange=()=>{ if(!pm.value) return; S.period=pm.value; store("period",S.period); if(S.period==="custom"){ const [f,t]=periodRange(); S.from=f; S.to=t; } buildFilters(); render(); };
   $("#customRange").hidden = S.period!=="custom";
   if(S.period==="custom"){ const [f,t]=periodRange(); $("#dFrom").value=f; $("#dTo").value=t; }
-  const vc=$("#vehChips"); vc.querySelectorAll(".chip").forEach(c=>c.remove());
+  const vc=$("#vehSeg"); vc.innerHTML="";
   if(!M) return;
-  const all=document.createElement("button"); all.className="chip"; all.textContent="Alla"; all.setAttribute("aria-pressed",S.veh.size===0);
-  all.onclick=()=>{ S.veh.clear(); store("veh",[]); buildFilters(); render(); }; vc.appendChild(all);
-  for(const v of M.vlist){ const b=document.createElement("button"); b.className="chip"; b.setAttribute("aria-pressed",S.veh.has(v.key));
+  const all=document.createElement("button"); all.textContent="Alla bilar"; all.setAttribute("aria-pressed",S.veh.size===0);
+  all.onclick=()=>{ S.veh.clear(); store("veh",[]); buildFilters(); render(); }; vc.append(all);
+  for(const v of M.vlist){ const b=document.createElement("button"); b.setAttribute("aria-pressed",S.veh.has(v.key));
     b.innerHTML=`<i class="sw" style="background:var(${v.color})"></i>${esc(v.name)}`;
     b.onclick=()=>{ S.veh.has(v.key)?S.veh.delete(v.key):S.veh.add(v.key); if(S.veh.size===M.vlist.length) S.veh.clear(); store("veh",[...S.veh]); buildFilters(); render(); };
-    vc.appendChild(b); }
+    vc.append(b); }
 }
 $("#dFrom").onchange=e=>{ S.from=e.target.value; render(); };
 $("#dTo").onchange=e=>{ S.to=e.target.value; render(); };
@@ -516,23 +600,20 @@ function secSeason(){
   const onTime = last && last<=SEASON_END && unplanned<1000;
   return el(`<section><div class="hero">
    <div class="card">
-     <div class="ink2" style="font-size:13px">Säsongen totalt · ${S.incKM?"alla mätområden inkl. kontrollmätningar":"exkl. kontrollmätningar (KM)"}</div>
-     <div class="num">${km0(meas)} <small>av ${km0(tot)} km uppmätt</small></div>
+     <div class="ink2">Säsongen${S.incKM?", inklusive kontrollmätningar":""}</div>
+     <div class="num">${km0(meas)} km <small>av ${km0(tot)} km uppmätt</small></div>
      <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt"><span style="width:${pm}%;background:var(--good)"></span></div>
-     <div class="legend">
-       <span><i class="sw" style="background:var(--good)"></i>Uppmätt ${km0(meas)} km · ${pct(meas,tot)}</span>
-       <span><i class="sw" style="background:var(--track);border:1px solid var(--border)"></i>Kvar att mäta ${km0(remain)} km</span>
-     </div>
+     <div class="legend"><span><b style="color:var(--ink);font-weight:600">${pct(meas,tot)}</b>&nbsp;uppmätt</span><span>${km0(remain)} km kvar att mäta</span></div>
    </div>
    <div class="card">
-     <div class="ink2" style="font-size:13px">Plan mot slutdatum ${fmtDate(SEASON_END)}</div>
+     <div class="ink2">Plan mot slutdatum ${fmtDate(SEASON_END)}</div>
+     <div class="planline"><span class="pd">${last?fmtDate(last):"–"}</span>${last?(onTime?'<span class="badge b-fixed">Hinner i tid</span>':`<span class="badge b-dev">${last>SEASON_END?Math.round((parseD(last)-parseD(SEASON_END))/864e5)+" dagar sent":"Ej helt inplanerat"}</span>`):""}</div>
+     <div class="ink2" style="margin-top:2px">sista planerade mätdag i Balder</div>
      <div class="statgrid">
-       <div class="stat"><div class="l">Kvar att mäta</div><div class="v">${km0(remain)} km</div></div>
        <div class="stat"><div class="l">Dagar kvar</div><div class="v">${daysLeft}</div></div>
-       <div class="stat"><div class="l">Inplanerat i Balder</div><div class="v">${km0(Math.min(sched,remain))} km</div></div>
-       <div class="stat"><div class="l">Ej inplanerat</div><div class="v ${unplanned>=1000?"bad":""}">${km0(unplanned)} km</div></div>
-       ${late>=1000?`<div class="stat" style="grid-column:1/-1"><div class="l">Planerat före idag men ej mätt</div><div class="v bad">${km0(late)} km</div></div>`:""}
-       <div class="stat" style="grid-column:1/-1"><div class="l">Klart enligt nuvarande plan</div><div class="v ${onTime?"ok":"bad"}">${last?fmtDate(last)+" "+last.slice(0,4):"–"}${last&&last>SEASON_END?" · "+Math.round((parseD(last)-parseD(SEASON_END))/864e5)+" dagar efter slutdatum":""}${unplanned>=1000?" · "+km0(unplanned)+" km saknar datum":""}</div></div>
+       <div class="stat"><div class="l">Inplanerat</div><div class="v">${km0(Math.min(sched,remain))} km</div></div>
+       <div class="stat"><div class="l">Saknar datum</div><div class="v ${unplanned>=1000?"bad":""}">${km0(unplanned)} km</div></div>
+       <div class="stat"><div class="l">Planerat bakåt, ej mätt</div><div class="v ${late>=1000?"bad":""}">${km0(late)} km</div></div>
      </div>
    </div></div></section>`);
 }
@@ -592,7 +673,7 @@ function secProduction(P,from,to){
 
 function secVehicles(P,from,to,D){
   const T=todayStr();
-  const sec=el(`<section><h2>Bilar<span class="h-sub">vald period · idag ${fmtDate(T)}</span></h2><div class="vgrid"></div></section>`);
+  const sec=el(`<section><h2>Bilar<span class="h-sub">vald period</span></h2><div class="vgrid"></div></section>`);
   const g=sec.querySelector(".vgrid");
   const spDays=[]; for(let i=13;i>=0;i--) spDays.push(ymd(addDays(new Date(),-i)));
   for(const v of M.vlist){ if(!vehOn(v.key)) continue;
@@ -609,21 +690,18 @@ function secVehicles(P,from,to,D){
     const labels=[...new Set(today.map(r=>M.wdById.get(r.wd)?.day_label).filter(Boolean))].join(", ");
     g.append(el(`<div class="card vcard">
       <h3><i class="sw" style="background:var(${v.color})"></i>${esc(v.name)} <span class="reg">${esc(v.reg)}</span></h3>
-      <div class="big">${km(kmM)} <small>km uppmätt</small></div>
-      <div class="muted" style="font-size:12.5px">${vd} mätdagar · snitt ${vd?km(kmM/vd):"–"} km/dag</div>
+      <div class="big">${km(kmM)} <small>km</small></div>
+      <div class="vsub">${vd} mätdagar · snitt ${vd?km(kmM/vd):"–"} km per dag</div>
       <dl>
-        <dt>Idag</dt><dd>${today.length?`${km(todayDone)} / ${km(todayPlan)} km`:'<span class="muted">ingen plan</span>'}</dd>
-        ${labels?`<dt>Dagens rutt</dt><dd style="white-space:normal">${esc(labels)}</dd>`:""}
-        <dt>Uppmätta sträckor</dt><dd>${m.length}</dd>
-        ${(()=>{ const dd=D.filter(d=>d.veh===v.key); if(!dd.length) return M.diaryVeh.has(v.key)?`<dt>Körjournal</dt><dd class="muted">ingen i perioden</dd>`:""; const ph=dd.reduce((a,d)=>a+d.t.prod,0), th=dd.reduce((a,d)=>a+d.total,0); const mk=M.rows.filter(r=>r.veh===v.key&&MEASURED.has(r.st)&&dd.some(d=>d.date===r.date)).reduce((a,r)=>a+r.len,0);
-          return `<dt>Produktionstid</dt><dd>${nf1.format(ph)} h av ${nf1.format(th)} h (${th?nf0.format(100*ph/th):0} %)</dd><dt>Km per prod.timme</dt><dd>${ph?nf1.format(mk/1000/ph):"–"}</dd>`; })()}
-        <dt>Avvikelser</dt><dd>${dev}</dd>
-        <dt>Bästa dag</dt><dd>${bestDay?`${km(bestDay[1])} km · ${fmtDate(bestDay[0])}`:"–"}</dd>
+        <dt>Idag</dt><dd>${today.length?`${km(todayDone)} av ${km(todayPlan)} km`:'<span class="muted">Ingen plan</span>'}</dd>
+        ${(()=>{ const dd=D.filter(d=>d.veh===v.key); if(!dd.length) return ""; const ph=dd.reduce((a,d)=>a+d.t.prod,0), th=dd.reduce((a,d)=>a+d.total,0); const mk=M.rows.filter(r=>r.veh===v.key&&MEASURED.has(r.st)&&dd.some(d=>d.date===r.date)).reduce((a,r)=>a+r.len,0);
+          return `<dt>Produktionstid</dt><dd>${nf0.format(ph)} h (${th?nf0.format(100*ph/th):0} %)</dd><dt>Km per prod.timme</dt><dd>${ph?nf1.format(mk/1000/ph):"–"}</dd>`; })()}
+        <dt>Avvikelser</dt><dd>${dev||'<span class="muted">0</span>'}</dd>
         <dt>Senast mätt</dt><dd>${lastM?fmtDate(lastM):"–"}</dd>
-        <dt>Nästa planerade dag</dt><dd>${nextD?fmtDate(nextD):"–"}</dd>
+        <dt>Nästa plan</dt><dd>${nextD?fmtDate(nextD):"–"}</dd>
       </dl>
-      <div class="spark" title="Uppmätta km senaste 14 dagarna" aria-label="Uppmätta km senaste 14 dagarna">${sp.map((x,i)=>`<i title="${fmtDate(spDays[i])}: ${km(x)} km" style="height:${Math.max(3,100*x/mx)}%;${x?`background:var(${v.color})`:""}"></i>`).join("")}</div>
-      <div class="muted" style="font-size:11.5px;margin-top:3px">senaste 14 dagarna</div>
+      <div class="spark" aria-label="Uppmätta km senaste 14 dagarna">${sp.map((x,i)=>`<i title="${fmtDate(spDays[i])}: ${km(x)} km" style="height:${Math.max(4,100*x/mx)}%;${x?`background:var(${v.color})`:""}"></i>`).join("")}</div>
+      <div class="spark-l">Senaste 14 dagarna</div>
     </div>`));
   }
   return sec;
@@ -641,7 +719,7 @@ function renderJournal(D,from,to){
   const odo=sum(D,d=>d.odo), tk=sum(D,d=>d.transKm), bk=sum(D,d=>d.balder);
   const smokeN=D.length*3, smokeOk=sum(D,d=>d.smoke.filter(Boolean).length);
   const rainDays=D.filter(d=>d.t.rain>=4).length, techDays=D.filter(d=>d.t.tech>0||d.eqBad.length).length, prodDays=D.filter(d=>d.t.prod>0).length;
-  out.push(el(`<section><div class="grid-kpi">
+  out.push(el(`<section><div class="grid-kpi kpi4">
     <div class="card kpi"><div class="lbl">Arbetad tid</div><div class="val">${nf0.format(T)}<small>h</small></div><div class="foot">${D.length} journaldagar · snitt ${nf1.format(T/D.length)} h/dag</div></div>
     <div class="card kpi"><div class="lbl">Produktionstid</div><div class="val">${nf0.format(Tp)}<small>h</small></div><div class="foot">${T?nf0.format(100*Tp/T):0} % av arbetad tid · ${prodDays} dagar</div></div>
     <div class="card kpi"><div class="lbl">Uppmätt per produktionstimme</div><div class="val">${Tp?nf1.format(bk/Tp):"–"}<small>km/h</small></div><div class="foot">${nf0.format(bk)} km uppmätt i Balder (inkl. KM)</div></div>
@@ -774,55 +852,61 @@ function secDayLog(P,D){
 
 function secOrders(P){
   const F=Object.assign({q:"",lan:"",typ:"",status:"",sort:"lan",dir:"asc"},recall("ordF",{}));
-  const sec=el(`<section><div class="toolbar"><h2>Mätområden<span class="h-sub">hela säsongen</span></h2></div>
-    <div class="ofilters">
-      <input type="search" placeholder="Sök mätområde…" aria-label="Sök mätområde" data-f="q">
-      <select data-f="lan" aria-label="Län"><option value="">Alla län</option></select>
-      <select data-f="typ" aria-label="Typ"><option value="">Alla typer</option><option value="std">Standard</option><option value="km">KM</option></select>
-      <select data-f="status" aria-label="Status"><option value="">Alla</option><option value="open">Ej klara</option><option value="done">Klara</option><option value="none">Ej påbörjade</option></select>
-      <select data-f="sort" aria-label="Sortera"><option value="lan">Sortera: Län</option><option value="name">Sortera: Namn</option><option value="pct">Sortera: % uppmätt</option><option value="remain">Sortera: Kvar att mäta</option><option value="meas">Sortera: Uppmätt km</option><option value="total">Sortera: Totalt km</option><option value="period">Sortera: Uppmätt i perioden</option></select>
-      <button data-f="dir" aria-label="Byt sorteringsordning"></button>
-      <span class="ocount ink2"></span>
+  const sec=el(`<section class="mo">
+    <div class="mo-head"><h2>Mätområden</h2><span class="mo-tot"></span></div>
+    <div class="mo-ctl"><input type="search" placeholder="Sök mätområde" aria-label="Sök mätområde" data-f="q"></div>
+    <div class="mo-ctl">
+      <select class="sel" data-f="sort" aria-label="Sortera"><option value="lan">Per län</option><option value="pct">Andel uppmätt</option><option value="remain">Kvar att mäta</option><option value="name">Namn</option><option value="total">Storlek</option><option value="period">Mätt i perioden</option></select>
+      <button data-f="dir" aria-label="Byt sorteringsordning" title="Byt sorteringsordning"></button>
+      <button data-f="more" aria-label="Fler filter" title="Fler filter">Filter</button>
     </div>
-    <div class="olist"></div></section>`);
+    <div class="mo-ctl mo-more" hidden>
+      <select class="sel" data-f="lan" aria-label="Län"><option value="">Alla län</option></select>
+      <select class="sel" data-f="status" aria-label="Status"><option value="">Alla</option><option value="open">Ej klara</option><option value="done">Klara</option><option value="none">Ej påbörjade</option></select>
+      <select class="sel" data-f="typ" aria-label="Typ"><option value="">Alla typer</option><option value="std">Standard</option><option value="km">KM</option></select>
+    </div>
+    <div class="mo-list"></div></section>`);
   const periodBy=new Map(); const seen=new Set();
   for(const r of P){ if(!MEASURED.has(r.st)||r.order==null||r.sc||seen.has(r.sid)) continue; const a=M.segAgg.get(r.sid); if(a.mDate!==r.date) continue; seen.add(r.sid); periodBy.set(r.order,(periodBy.get(r.order)||0)+a.len); }
-  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(s.meas,s.o.total); return {o:s.o,m,t:s.o.total,rem:Math.max(0,s.o.total-m),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan:LAN[s.o.lan]||("Län "+s.o.lan)}; });
-  const lanSel=sec.querySelector('[data-f="lan"]');
-  [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
+  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(s.meas,s.o.total); const lan=LAN[s.o.lan]||("Län "+s.o.lan);
+    const short=s.o.name.replace(/\s+26(\s+KM)?$/,"").replace(new RegExp("^"+lan+"\\s+"),"").trim()||s.o.name;
+    return {o:s.o,m,t:s.o.total,rem:Math.max(0,s.o.total-m),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan,short}; });
   const ctl=k=>sec.querySelector(`[data-f="${k}"]`);
+  const lanSel=ctl("lan"); [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
   if(!S.incKM){ F.typ=""; ctl("typ").hidden=true; }
   ["q","lan","typ","status","sort"].forEach(k=>{ ctl(k).value=F[k]; });
-  const dirBtn=ctl("dir");
+  const more=sec.querySelector(".mo-more"); more.hidden=!(F.lan||F.status||F.typ||recall("moMore",false));
+  ctl("more").onclick=()=>{ more.hidden=!more.hidden; store("moMore",!more.hidden); };
+  const pc = p => nf0.format(Math.floor(100*p))+" %";
+  const kmS = m => nf0.format(m/1000);
   const draw=()=>{
-    store("ordF",F); dirBtn.textContent=F.dir==="asc"?"↑ Stigande":"↓ Fallande";
+    store("ordF",F); ctl("dir").textContent=F.dir==="asc"?"↑":"↓"; ctl("dir").title=F.dir==="asc"?"Stigande":"Fallande";
+    ctl("more").classList.toggle("on", !!(F.lan||F.status||F.typ));
     const q=F.q.trim().toLowerCase();
-    let L=items.filter(i=>(!q||i.o.name.toLowerCase().includes(q)||i.lan.toLowerCase().includes(q))
+    let L=items.filter(i=>(!q||i.o.name.toLowerCase().includes(q))
       &&(!F.lan||i.lan===F.lan)&&(!F.typ||(F.typ==="km")===i.o.km)
       &&(!F.status||(F.status==="done"?i.rem<1000:F.status==="open"?i.rem>=1000:i.m<1)));
-    const key={name:i=>i.o.name,pct:i=>i.p,remain:i=>i.rem,meas:i=>i.m,total:i=>i.t,period:i=>i.pp,lan:i=>i.lan}[F.sort];
+    const key={name:i=>i.o.name,pct:i=>i.p,remain:i=>i.rem,total:i=>i.t,period:i=>i.pp,lan:i=>i.lan}[F.sort];
     const sgn=F.dir==="asc"?1:-1;
     L.sort((a,b)=>{ const x=key(a),y=key(b); const c=typeof x==="string"?x.localeCompare(y,"sv"):x-y; return sgn*c || (a.o.km-b.o.km) || a.o.name.localeCompare(b.o.name,"sv"); });
     const sm=L.reduce((a,i)=>a+i.m,0), st=L.reduce((a,i)=>a+i.t,0);
-    sec.querySelector(".ocount").textContent=`${L.length} av ${items.length} mätområden · ${km(sm)} / ${km(st)} km · ${pct(sm,st)}`;
-    const row=(i,showLan)=>`<div class="prow"><div class="nm" title="${esc(i.o.name)}">${esc(i.o.name)}${i.o.km?'<span class="tag">KM</span>':""}${showLan?` <span class="muted">· ${esc(i.lan)}</span>`:""}</div>
-        <div class="fig"><b>${km(i.m)}</b> <span>/ ${km(i.t)} km</span> · <b>${pct(i.m,i.t)}</b> <span>· kvar ${km(i.rem)} km</span>${i.pp?` <span>(+${km(i.pp)} i perioden)</span>`:""}</div>
-        <div class="pbar" role="img" aria-label="${pct(i.m,i.t)} uppmätt"><i style="width:${100*i.p}%;background:var(--good)"></i></div></div>`;
-    const box=sec.querySelector(".olist");
-    if(!L.length){ box.innerHTML=`<div class="card"><div class="empty">Inga mätområden matchar filtret.</div></div>`; return; }
+    sec.querySelector(".mo-tot").innerHTML=`<b style="color:var(--ink);font-weight:600">${pc(st?sm/st:0)}</b> · ${kmS(st-sm)} km kvar`;
+    const row=(i,grouped)=>{ const done=i.rem<1000;
+      const tip=`${i.o.name}\n${km(i.m)} / ${km(i.t)} km uppmätt (${pct(i.m,i.t)})\nKvar: ${km(i.rem)} km${i.pp?`\nI perioden: +${km(i.pp)} km`:""}`;
+      return `<div class="mr${done?" done":""}" title="${esc(tip)}"><span class="mn">${esc(grouped?i.short:i.o.name.replace(/\s+26(\s+KM)?$/,""))}${i.o.km?'<span class="tag">KM</span>':""}</span><span class="mb"><i style="width:${100*i.p}%"></i></span><span class="mp">${pc(i.p)}</span></div>`; };
+    const box=sec.querySelector(".mo-list");
+    if(!L.length){ box.innerHTML=`<div class="empty">Inga mätområden matchar.</div>`; return; }
     if(F.sort==="lan"){
       const groups=new Map(); for(const i of L){ (groups.get(i.lan)||groups.set(i.lan,[]).get(i.lan)).push(i); }
       box.innerHTML=[...groups.entries()].map(([lan,g])=>{ const m=g.reduce((a,i)=>a+i.m,0), t=g.reduce((a,i)=>a+i.t,0);
         g.sort((a,b)=>(a.o.km-b.o.km)||a.o.name.localeCompare(b.o.name,"sv"));
-        return `<div class="card ord-county" style="padding:0"><div class="chead"><span>${esc(lan)}</span><span class="fig">${km(m)} / ${km(t)} km · ${pct(m,t)} · kvar ${km(t-m)} km</span></div><div>${g.map(i=>row(i,false)).join("")}</div></div>`; }).join("");
-    } else {
-      box.innerHTML=`<div class="card" style="padding:0">${L.map(i=>row(i,true)).join("")}</div>`;
-    }
+        return `<div class="mg"><div class="mgh" title="${esc(lan)}: ${km(m)} av ${km(t)} km, kvar ${km(t-m)} km"><span class="mn">${esc(lan)}</span><span class="mb"><i style="width:${t?100*m/t:0}%"></i></span><span class="mp">${pc(t?m/t:0)}</span></div>${g.map(i=>row(i,true)).join("")}</div>`; }).join("");
+    } else box.innerHTML=`<div class="mg">${L.map(i=>row(i,false)).join("")}</div>`;
   };
   ctl("q").addEventListener("input",e=>{ F.q=e.target.value; draw(); });
   ["lan","typ","status","sort"].forEach(k=>ctl(k).addEventListener("change",e=>{ F[k]=e.target.value;
-    if(k==="sort") F.dir = (["pct","name","lan"].includes(F.sort))?"asc":"desc"; draw(); }));
-  dirBtn.onclick=()=>{ F.dir=F.dir==="asc"?"desc":"asc"; draw(); };
+    if(k==="sort") F.dir = (["name","lan"].includes(F.sort))?"asc":"desc"; draw(); }));
+  ctl("dir").onclick=()=>{ F.dir=F.dir==="asc"?"desc":"asc"; draw(); };
   draw();
   return sec;
 }
@@ -849,9 +933,9 @@ function secAhead(){
   if(!rs.length){ sec.querySelector(".tbl-wrap").innerHTML=`<div class="empty">Inget planerat de kommande 14 dagarna.</div>`; return sec; }
   const vs=M.vlist.filter(v=>vehOn(v.key)&&rs.some(r=>r.veh===v.key));
   const dates=[...new Set(rs.map(r=>r.date))].sort();
-  const cell=(d,v)=>{ const x=rs.filter(r=>r.date===d&&r.veh===v.key); if(!x.length) return `<td class="muted">–</td>`; const lbl=[...new Set(x.map(r=>M.wdById.get(r.wd)?.day_label).filter(Boolean))].join(", ");
-    return `<td><b>${km(x.reduce((a,r)=>a+r.len,0))} km</b> <span class="muted" style="font-size:12px">${esc(lbl)}</span></td>`; };
-  sec.querySelector(".tbl-wrap").innerHTML=`<table><thead><tr><th>Datum</th>${vs.map(v=>`<th><i class="sw" style="background:var(${v.color})"></i> ${esc(v.name)}</th>`).join("")}<th class="n">Totalt</th></tr></thead><tbody>${dates.map(d=>`<tr><td>${fmtDate(d)}</td>${vs.map(v=>cell(d,v)).join("")}<td class="n">${km(rs.filter(r=>r.date===d).reduce((a,r)=>a+r.len,0))}</td></tr>`).join("")}</tbody></table>`;
+  const cell=(d,v)=>{ const x=rs.filter(r=>r.date===d&&r.veh===v.key); if(!x.length) return `<td class="n muted">–</td>`; const lbl=[...new Set(x.map(r=>M.wdById.get(r.wd)?.day_label).filter(Boolean))].join(", ");
+    return `<td class="n" title="${esc(lbl)}">${km(x.reduce((a,r)=>a+r.len,0))} km</td>`; };
+  sec.querySelector(".tbl-wrap").innerHTML=`<table><thead><tr><th>Datum</th>${vs.map(v=>`<th class="n"><i class="sw" style="background:var(${v.color})"></i> ${esc(v.name)}</th>`).join("")}<th class="n">Totalt</th></tr></thead><tbody>${dates.map(d=>`<tr><td>${fmtDate(d)}</td>${vs.map(v=>cell(d,v)).join("")}<td class="n">${km(rs.filter(r=>r.date===d).reduce((a,r)=>a+r.len,0))}</td></tr>`).join("")}</tbody></table>`;
   return sec;
 }
 
@@ -868,8 +952,8 @@ function setLive(){
   const e=$("#liveState");
   if(loading && !M){ e.innerHTML=`<span class="dot"></span>Hämtar…`; return; }
   if(loadErr && !M){ e.innerHTML=`<span class="dot err"></span>Fel vid hämtning`; return; }
-  e.innerHTML = rtState==="on"?`<span class="dot on"></span>Live`:`<span class="dot"></span>Uppdateras var ${CFG.pollMinutes}:e minut`;
-  $("#updated").textContent = loading?"Uppdaterar…":lastLoad?"Senast "+lastLoad.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"";
+  e.innerHTML = rtState==="on"?`<span class="dot on"></span>Live`:`<span class="dot"></span>Uppdateras var ${CFG.pollMinutes}:e min`;
+  $("#updated").textContent = loading?"Uppdaterar…":lastLoad?"· "+lastLoad.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"}):"";
 }
 function scheduleReload(){ clearTimeout(debounceT); debounceT=setTimeout(loadAll,CFG.realtimeDebounceMs); }
 function startRealtime(){
