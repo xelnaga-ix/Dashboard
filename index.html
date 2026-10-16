@@ -1230,7 +1230,7 @@ function buildModel(R){
 const PERIODS = [
   {k:"today",l:"Idag"},{k:"yesterday",l:"Igår"},{k:"week",l:"Denna vecka"},{k:"lastweek",l:"Förra veckan"},
   {k:"month",l:"Denna månad"},{k:"lastmonth",l:"Förra månaden"},{k:"30d",l:"30 dagar"},{k:"season",l:"Hela säsongen"},{k:"custom",l:"Anpassad"}];
-const S = { incKM: recall("incKM",false), period: recall("period","week"), from:null, to:null, gran: recall("gran","day"), veh: new Set(recall("veh",[])) };
+const S = { useLimit: recall("useLimit",false), incKM: recall("incKM",false), period: recall("period","week"), from:null, to:null, gran: recall("gran","day"), veh: new Set(recall("veh",[])) };
 function periodRange(){
   const t=new Date(); const T=ymd(t);
   switch(S.period){
@@ -1330,7 +1330,7 @@ function secSeason(){
      <div class="ink2">Säsongen${S.incKM?", inklusive kontrollmätningar":""}</div>
      <div class="num">${km0(meas)} km <small>av ${km0(tot)} km uppmätt</small></div>
      <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt"><span style="width:${pm}%;background:var(--good)"></span></div>
-     <div class="legend"><span><b style="color:var(--ink);font-weight:600">${pct(meas,tot)}</b>&nbsp;uppmätt</span><span>${km0(remain)} km kvar att mäta</span>${lateTot>=1000?`<span style="color:var(--crit)">varav ${km0(lateTot)} km mätt efter tidsgräns</span>`:""}</div>
+     <div class="legend"><span><b style="color:var(--ink);font-weight:600">${pct(meas,tot)}</b>&nbsp;uppmätt</span><span>${km0(remain)} km kvar att mäta</span>${S.useLimit&&lateTot>=1000?`<span style="color:var(--crit)">varav ${km0(lateTot)} km mätt efter tidsgräns</span>`:""}</div>
    </div>
    <div class="card">
      <div class="ink2">Plan mot slutdatum ${fmtDate(SEASON_END)}</div>
@@ -1603,7 +1603,7 @@ function renderMap(from,to){
   // länspanel med framsteg (mätområden sammanslagna per län)
   const side=sec.querySelector(".mapside");
   const byLan=new Map(); let TM=0,TT=0;
-  for(const st of M.ordStats){ if(!ORD_OK(st.o)) continue; const m=Math.min(st.measOK,st.o.total), t=st.o.total; TM+=m; TT+=t; const x=byLan.get(st.o.lan)||{m:0,t:0}; x.m+=m; x.t+=t; byLan.set(st.o.lan,x); }
+  for(const st of M.ordStats){ if(!ORD_OK(st.o)) continue; const m=Math.min(S.useLimit?st.measOK:st.meas,st.o.total), t=st.o.total; TM+=m; TT+=t; const x=byLan.get(st.o.lan)||{m:0,t:0}; x.m+=m; x.t+=t; byLan.set(st.o.lan,x); }
   const pcf=v=>nf0.format(Math.floor(100*v))+" %";
   side.innerHTML=`<div class="ms-h"><h2>Per län</h2><span class="mo-tot">${nf0.format((TT-TM)/1000)} km kvar</span></div>
     <button class="ms-row${MAPF.lan===""?" sel":""}" data-lan=""><span class="ms-n">Alla län</span><span class="ms-p">${pcf(TT?TM/TT:0)}</span><span class="ms-b"><i style="width:${TT?100*TM/TT:0}%"></i></span><span class="ms-k">${nf0.format(TM/1000)} av ${nf0.format(TT/1000)} km</span></button>`+
@@ -1705,25 +1705,27 @@ function secOrders(P){
     <div class="mo-ctl mo-more" hidden>
       <select class="sel" data-f="lan" aria-label="Län"><option value="">Alla län</option></select>
       <select class="sel" data-f="status" aria-label="Status"><option value="">Alla</option><option value="open">Ej klara</option><option value="done">Klara</option><option value="none">Ej påbörjade</option></select>
+      <label class="switch" style="font-size:12px;flex:1 1 100%"><input type="checkbox" data-f="limit"> Räkna med tidsgräns i beställningen</label>
       <select class="sel" data-f="typ" aria-label="Typ"><option value="">Alla typer</option><option value="std">Standard</option><option value="km">KM</option></select>
     </div>
     <div class="mo-list"></div></section>`);
   const periodBy=new Map(); const seen=new Set();
   for(const r of P){ if(!MEASURED.has(r.st)||r.order==null||r.sc||seen.has(r.sid)) continue; const a=M.segAgg.get(r.sid); if(a.mDate!==r.date) continue; seen.add(r.sid); periodBy.set(r.order,(periodBy.get(r.order)||0)+a.len); }
-  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(s.measOK,s.o.total), late=Math.min(s.measLate,s.o.total-m); const lan=LAN[s.o.lan]||("Län "+s.o.lan);
+  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(S.useLimit?s.measOK:s.meas,s.o.total), late=S.useLimit?Math.min(s.measLate,s.o.total-m):0; const lan=LAN[s.o.lan]||("Län "+s.o.lan);
     const short=s.o.name.replace(/\s+26(\s+KM)?$/,"").replace(new RegExp("^"+lan+"\\s+"),"").trim()||s.o.name;
     return {o:s.o,m,late,t:s.o.total,rem:Math.max(0,s.o.total-m),left:Math.max(0,s.o.total-m-late),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan,short}; });
   const ctl=k=>sec.querySelector(`[data-f="${k}"]`);
   const lanSel=ctl("lan"); [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
   if(!S.incKM){ F.typ=""; ctl("typ").hidden=true; }
   ["q","lan","typ","status","sort"].forEach(k=>{ ctl(k).value=F[k]; });
-  const more=sec.querySelector(".mo-more"); more.hidden=!(F.lan||F.status||F.typ||recall("moMore",false));
+  ctl("limit").checked=S.useLimit; ctl("limit").onchange=e=>{ S.useLimit=e.target.checked; store("useLimit",S.useLimit); render(); };
+  const more=sec.querySelector(".mo-more"); more.hidden=!(F.lan||F.status||F.typ||S.useLimit||recall("moMore",false));
   ctl("more").onclick=()=>{ more.hidden=!more.hidden; store("moMore",!more.hidden); };
   const pc = p => nf0.format(Math.floor(100*p))+" %";
   const kmS = m => nf0.format(m/1000);
   const draw=()=>{
     store("ordF",F); ctl("dir").textContent=F.dir==="asc"?"↑":"↓"; ctl("dir").title=F.dir==="asc"?"Stigande":"Fallande";
-    ctl("more").classList.toggle("on", !!(F.lan||F.status||F.typ));
+    ctl("more").classList.toggle("on", !!(F.lan||F.status||F.typ||S.useLimit));
     const q=F.q.trim().toLowerCase();
     let L=items.filter(i=>(!q||i.o.name.toLowerCase().includes(q))
       &&(!F.lan||i.lan===F.lan)&&(!F.typ||(F.typ==="km")===i.o.km)
@@ -1732,9 +1734,9 @@ function secOrders(P){
     const sgn=F.dir==="asc"?1:-1;
     L.sort((a,b)=>{ const x=key(a),y=key(b); const c=typeof x==="string"?x.localeCompare(y,"sv"):x-y; return sgn*c || (a.o.km-b.o.km) || a.o.name.localeCompare(b.o.name,"sv"); });
     const sm=L.reduce((a,i)=>a+i.m,0), st=L.reduce((a,i)=>a+i.t,0);
-    sec.querySelector(".mo-tot").innerHTML=`<b style="color:var(--ink);font-weight:600">${pc(st?sm/st:0)}</b> inom tidsgräns`;
+    sec.querySelector(".mo-tot").innerHTML=`<b style="color:var(--ink);font-weight:600">${pc(st?sm/st:0)}</b> ${S.useLimit?"inom tidsgräns":"uppmätt"}`;
     const row=(i,grouped)=>{ const done=i.rem<1000;
-      const tip=`${i.o.name}\nInom tidsgräns: ${km(i.m)} av ${km(i.t)} km (${pct(i.m,i.t)})${i.late>=100?`\nMätt efter tidsgräns: ${km(i.late)} km`:""}\nKvar att mäta: ${km(i.left)} km${i.pp?`\nI perioden: +${km(i.pp)} km`:""}`;
+      const tip=`${i.o.name}\n${S.useLimit?"Inom tidsgräns":"Uppmätt"}: ${km(i.m)} av ${km(i.t)} km (${pct(i.m,i.t)})${i.late>=100?`\nMätt efter tidsgräns: ${km(i.late)} km`:""}\nKvar att mäta: ${km(i.left)} km${i.pp?`\nI perioden: +${km(i.pp)} km`:""}`;
       return `<div class="mr${done?" done":""}" title="${esc(tip)}"><span class="mn">${esc(grouped?i.short:i.o.name.replace(/\s+26(\s+KM)?$/,""))}${i.o.km?'<span class="tag">KM</span>':""}</span><span class="mb"><i style="width:${100*i.p}%"></i>${i.late>=100?`<i class="late" style="width:${100*i.late/i.t}%"></i>`:""}</span><span class="mp${i.late>=1000?" warn":""}">${pc(i.p)}</span></div>`; };
     const box=sec.querySelector(".mo-list");
     if(!L.length){ box.innerHTML=`<div class="empty">Inga mätområden matchar.</div>`; return; }
@@ -1742,9 +1744,9 @@ function secOrders(P){
       const groups=new Map(); for(const i of L){ (groups.get(i.lan)||groups.set(i.lan,[]).get(i.lan)).push(i); }
       box.innerHTML=[...groups.entries()].map(([lan,g])=>{ const m=g.reduce((a,i)=>a+i.m,0), t=g.reduce((a,i)=>a+i.t,0), lt=g.reduce((a,i)=>a+i.late,0);
         g.sort((a,b)=>(a.o.km-b.o.km)||a.o.name.localeCompare(b.o.name,"sv"));
-        return `<div class="mg"><div class="mgh" title="${esc(lan)}: ${km(m)} av ${km(t)} km inom tidsgräns${lt>=100?`, ${km(lt)} km mätt efter tidsgräns`:""}, kvar ${km(t-m-lt)} km"><span class="mn">${esc(lan)}</span><span class="mb"><i style="width:${t?100*m/t:0}%"></i>${lt>=100?`<i class="late" style="width:${100*lt/t}%"></i>`:""}</span><span class="mp">${pc(t?m/t:0)}</span></div>${g.map(i=>row(i,true)).join("")}</div>`; }).join("");
+        return `<div class="mg"><div class="mgh" title="${esc(lan)}: ${km(m)} av ${km(t)} km ${S.useLimit?"inom tidsgräns":"uppmätt"}${lt>=100?`, ${km(lt)} km mätt efter tidsgräns`:""}, kvar ${km(t-m-lt)} km"><span class="mn">${esc(lan)}</span><span class="mb"><i style="width:${t?100*m/t:0}%"></i>${lt>=100?`<i class="late" style="width:${100*lt/t}%"></i>`:""}</span><span class="mp">${pc(t?m/t:0)}</span></div>${g.map(i=>row(i,true)).join("")}</div>`; }).join("");
     } else box.innerHTML=`<div class="mg">${L.map(i=>row(i,false)).join("")}</div>`;
-    if(L.some(i=>i.late>=100)) box.insertAdjacentHTML("beforeend",`<div class="mo-leg"><span><i style="background:var(--good)"></i>Inom tidsgräns</span><span><i style="background:var(--crit)"></i>Mätt efter tidsgräns</span></div>`);
+    if(S.useLimit&&L.some(i=>i.late>=100)) box.insertAdjacentHTML("beforeend",`<div class="mo-leg"><span><i style="background:var(--good)"></i>Inom tidsgräns</span><span><i style="background:var(--crit)"></i>Mätt efter tidsgräns</span></div>`);
   };
   ctl("q").addEventListener("input",e=>{ F.q=e.target.value; draw(); });
   ["lan","typ","status","sort"].forEach(k=>ctl(k).addEventListener("change",e=>{ F[k]=e.target.value;
