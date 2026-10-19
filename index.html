@@ -59,7 +59,7 @@ button,input,select{font:inherit;color:inherit}
 .n{text-align:right;font-variant-numeric:tabular-nums}
 
 /* Topp */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:1050;background:var(--surface);border-bottom:1px solid var(--line)}
 .top-in{max-width:1640px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;gap:28px;min-height:56px}
 .title{display:flex;flex-direction:column;justify-content:center}
 .title h1{font-size:16px;margin:0;font-weight:600;letter-spacing:-.005em}
@@ -116,6 +116,57 @@ h2 .h-sub,.h-sub{font-weight:400;color:var(--muted);font-size:12.5px;margin-left
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .empty{color:var(--muted);padding:20px;text-align:center;font-size:13px}
 .loading{padding:80px 0;text-align:center;color:var(--muted)}
+
+.ti{display:none;width:20px;height:20px}
+#vehSel{min-width:0}
+.vlm{padding:4px 14px}
+.vr{padding:12px 0;border-top:1px solid var(--line)}
+.vr:first-child{border-top:none}
+.vr-h{display:flex;align-items:center;gap:8px;font-size:14px}
+.vr-h .muted{font-size:12px}
+.vr-km{margin-left:auto;font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+.vr-s{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin-top:2px}
+.spark.sm{height:22px;padding-top:8px}
+@media (max-width:700px){
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .top-in{min-height:52px;padding:0 16px;gap:8px;flex-wrap:nowrap}
+  .title h1{font-size:15px}
+  .live{gap:2px}
+  #liveState{font-size:0;gap:0}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:1100;background:var(--surface);border-top:1px solid var(--line);justify-content:space-around;min-height:0;width:auto;order:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:11px;font-weight:500;border:none;color:var(--muted)}
+  .tabs button[aria-selected="true"]{color:var(--ink);font-weight:600;border:none}
+  .ti{display:block}
+  .wrap{padding:0 12px 32px}
+  .filters{gap:8px;padding:12px 0 2px;flex-wrap:wrap}
+  .filters .fgroup{flex:1 1 40%;min-width:0}
+  .filters .sel{width:100%}
+  #customRange{display:flex;gap:6px;width:100%}
+  #kmGroup{flex:1 1 100%;font-size:12.5px}
+  .range-note{font-size:12px}
+  section{margin-top:18px}
+  .main>section:first-child{margin-top:12px}
+  .hero>.card{padding:16px}
+  .hero .num{font-size:26px}
+  .hero .num small{display:block;margin:2px 0 0}
+  footer summary{cursor:pointer;color:var(--ink-2)}
+  .ms-row{padding:6px 8px}
+  .planline .pd{font-size:20px}
+  .statgrid{gap:8px 14px}
+  .stat .v{font-size:15px}
+  .grid-kpi{grid-template-columns:1fr 1fr}
+  .grid-kpi .card.kpi{padding:12px 14px}
+  .grid-kpi>.card:last-child:nth-child(odd){grid-column:1/-1}
+  .kpi .val{font-size:19px}
+  .kpi .foot{font-size:11.5px}
+  .chartbox{height:210px}
+  .card{padding:14px}
+  .mo{padding:12px 12px 6px}
+  details.fold>summary{padding:12px 0}
+  .fold-in>section{margin-top:10px}
+  #map{height:62vh;min-height:360px}
+  .toolbar{gap:8px}
+}
 footer{color:var(--muted);font-size:12px;margin-top:40px;line-height:1.6;max-width:110ch}
 .banner{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--warn-soft);color:var(--ink);font-size:13px}
 .banner.err{background:var(--crit-soft)}
@@ -232,6 +283,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 .mp{text-align:right;font-size:12px}
 .mr .mp{color:var(--ink-2)}
 .mb{height:4px;border-radius:2px;background:var(--track);overflow:hidden;display:flex}
+.mb i.ndl{opacity:.4}
 .mb i.late{background:var(--crit)!important;border-radius:0}
 .mp.warn{color:var(--crit)!important}
 .mo-leg{display:flex;gap:12px;font-size:11.5px;color:var(--muted);padding:8px 2px 2px;border-top:1px solid var(--line);margin-top:4px}
@@ -298,7 +350,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 <body>
 <header class="top"><div class="top-in">
   <div class="title"><h1 id="ttl">Mätuppföljning</h1><div class="sub" id="subttl">Road Plan 2026</div></div>
-  <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="matning">Mätning</button><button role="tab" data-tab="karta">Karta</button><button role="tab" data-tab="journal">Körjournal</button></nav>
+  <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="matning"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17V9M8 17V4M13 17v-6M18 17V7"/></svg>Mätning</button><button role="tab" data-tab="karta"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5l5-2 6 2 5-2v12l-5 2-6-2-5 2z"/><path d="M7 3v12M13 5v12"/></svg>Karta</button><button role="tab" data-tab="journal"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Körjournal</button></nav>
   <div class="live">
     <span id="liveState"><span class="dot"></span>Ansluter…</span>
     <span id="updated"></span>
@@ -313,7 +365,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
     <div class="fgroup"><div class="seg" id="periodSeg" role="group" aria-label="Period"></div>
       <select class="sel" id="periodMore" aria-label="Annan period"></select>
       <span id="customRange" hidden><input type="date" id="dFrom" aria-label="Från datum"> – <input type="date" id="dTo" aria-label="Till datum"></span></div>
-    <div class="fgroup"><div class="seg" id="vehSeg" role="group" aria-label="Bilar"></div></div>
+    <div class="fgroup"><div class="seg" id="vehSeg" role="group" aria-label="Bilar"></div><select class="sel" id="vehSel" aria-label="Bilar" hidden></select></div>
     <label class="switch" id="kmGroup" title="Kontrollmätningar ersätts inte och räknas därför inte med som standard"><input type="checkbox" id="kmChk"> Inkludera kontrollmätningar</label>
   </div>
   <div class="range-note" id="rangeNote"></div>
@@ -1031,6 +1083,7 @@ const CFG = {
   realtimeDebounceMs: 4000  // samla ihop många ändringar till en omladdning
 };
 const MEASURED = new Set(["driven","paus_reviewed","processed","completed"]);
+const STAGE={driven:1,paus_reviewed:2,processed:3,completed:4};
 const STATUS_LBL = {planned:"Planerad",incomplete:"Ofullständig",driven:"Körd",paus_reviewed:"Paus granskad",processed:"Bearbetad",completed:"Klar",deviated:"Avvikelse",skipped:"Överhoppad"};
 const LAN = {1:"Stockholm",3:"Uppsala",4:"Södermanland",5:"Östergötland",6:"Jönköping",7:"Kronoberg",8:"Kalmar",9:"Gotland",10:"Blekinge",12:"Skåne",13:"Halland",14:"Västra Götaland",17:"Värmland",18:"Örebro",19:"Västmanland",20:"Dalarna",21:"Gävleborg",22:"Västernorrland",23:"Jämtland",24:"Västerbotten",25:"Norrbotten"};
 const SLOTS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
@@ -1172,7 +1225,7 @@ function buildModel(R){
   // rader
   const segsByWd=new Map();
   const rows = R.segs.map(s=>{ const w=wdById.get(s.work_day_id)||{}; const r={
-      id:s.id, wd:s.work_day_id, sid:s.segment_id, st:s.status, len:+s.segment_length_m||0,
+      id:s.id, wd:s.work_day_id, sid:s.segment_id, st:s.status, len:+s.segment_length_m||0, cat:s.completed_at?ymd(new Date(s.completed_at)):null,
       date:w.date||null, veh: vehById.has(w.vehicle_id)?w.vehicle_id:"none",
       fault:s.fault_code_id?faultById.get(s.fault_code_id):null, note:s.deviation_notes||s.skip_reason||"", seq:s.sequence_order||0,
       sc:(rsById.get(s.segment_id)||{}).sc||false, cand:orderCandidates(s.segment_id,rsById), order:null };
@@ -1187,20 +1240,20 @@ function buildModel(R){
   for(const r of rows){ r.mid=matstrackaId(r,rsById); r.km = r.order!=null ? ORDERS[r.order].km : /_MT21$/.test(r.sid); }
   // unika sträckor för orderframsteg
   const segAgg=new Map();
-  for(const r of rows){ let a=segAgg.get(r.sid); if(!a){ a={sid:r.sid,mid:r.mid,km:r.km,mDates:[],len:0,order:r.order,sc:r.sc,measured:false,completed:false,mDate:null,mVeh:null,dev:false,fault:null,planned:false,pDate:null,pVeh:null}; segAgg.set(r.sid,a); }
+  for(const r of rows){ let a=segAgg.get(r.sid); if(!a){ a={sid:r.sid,mid:r.mid,km:r.km,mDates:[],stage:0,dDate:null,len:0,order:r.order,sc:r.sc,measured:false,completed:false,mDate:null,mVeh:null,dev:false,fault:null,planned:false,pDate:null,pVeh:null}; segAgg.set(r.sid,a); }
     a.len=Math.max(a.len,r.len); if(a.order==null) a.order=r.order;
-    if(MEASURED.has(r.st)){ a.measured=true; if(r.date) a.mDates.push(r.date); if(r.st==="completed") a.completed=true; if(r.date && (!a.mDate||r.date<a.mDate)){ a.mDate=r.date; a.mVeh=r.veh; } }
+    if(MEASURED.has(r.st)){ a.measured=true; if(r.date) a.mDates.push(r.date); a.stage=Math.max(a.stage,STAGE[r.st]||0); if(r.st==="completed"){ const d=r.cat||r.date; if(d&&(!a.dDate||d<a.dDate)) a.dDate=d; } if(r.st==="completed") a.completed=true; if(r.date && (!a.mDate||r.date<a.mDate)){ a.mDate=r.date; a.mVeh=r.veh; } }
     else if(r.st==="deviated"){ a.dev=true; a.fault=r.fault; }
     else if(r.st==="planned"){ a.planned=true; if(r.date && (!a.pDate||r.date>a.pDate)){ a.pDate=r.date; a.pVeh=r.veh; } }
   }
-  const ordStats = ORDERS.map(o=>({o,meas:0,measOK:0,measLate:0,scheduled:0,pool:0,devOpen:0,inPlan:0,late:0,lastPlan:""}));
+  const ordStats = ORDERS.map(o=>({o,deliv:0,stg:[0,0,0,0,0],meas:0,measOK:0,measLate:0,scheduled:0,pool:0,devOpen:0,inPlan:0,late:0,lastPlan:""}));
   const T0=todayStr();
   let unknownLen=0;
   for(const a of segAgg.values()){
     if(a.sc) continue;
     if(a.order==null){ if(a.measured) unknownLen+=a.len; continue; }
     const s=ordStats[a.order]; s.inPlan+=a.len;
-    if(a.measured){ s.meas+=a.len; const w=segWindow(a,rsById); a.win=w; const ok=!a.mDates.length||a.mDates.some(d=>d>=w[0]&&d<=w[1]); a.late=!ok; if(ok) s.measOK+=a.len; else s.measLate+=a.len; }
+    if(a.measured){ s.meas+=a.len; s.stg[a.stage]+=a.len; if(a.stage===4) s.deliv+=a.len; const w=segWindow(a,rsById); a.win=w; const ok=!a.mDates.length||a.mDates.some(d=>d>=w[0]&&d<=w[1]); a.late=!ok; if(ok) s.measOK+=a.len; else s.measLate+=a.len; }
     else { if(a.dev) s.devOpen+=a.len; if(a.pDate){ s.scheduled+=a.len; if(a.pDate<T0) s.late+=a.len; if(a.pDate>s.lastPlan) s.lastPlan=a.pDate; } else s.pool+=a.len; }
   }
   // orderfiler i Balder som inte finns i inbäddat index
@@ -1253,17 +1306,22 @@ const vehOn = k => S.veh.size===0 || S.veh.has(k);
 const QUICK=["today","week","month","season"];
 function buildFilters(){
   const kc=$("#kmChk"); kc.checked=S.incKM; kc.onchange=()=>{ S.incKM=kc.checked; store("incKM",S.incKM); render(); };
+  const mob=MOB(); $("#periodSeg").hidden=mob; $("#vehSeg").hidden=mob; $("#vehSel").hidden=!mob;
   const ps=$("#periodSeg"); ps.innerHTML="";
   for(const k of QUICK){ const p=PERIODS.find(x=>x.k===k); const b=document.createElement("button"); b.textContent=p.l.replace("Denna ","").replace("Hela säsongen","Säsong").replace(/^./,c=>c.toUpperCase()); b.setAttribute("aria-pressed",S.period===k);
     b.onclick=()=>{ S.period=k; store("period",k); buildFilters(); render(); }; ps.append(b); }
   const pm=$("#periodMore"); pm.innerHTML=""; const others=PERIODS.filter(p=>!QUICK.includes(p.k));
-  pm.append(new Option("Annan period…","")); others.forEach(p=>pm.append(new Option(p.l,p.k)));
-  pm.value=QUICK.includes(S.period)?"":S.period; pm.classList.toggle("on",!QUICK.includes(S.period));
+  if(mob){ PERIODS.forEach(p=>pm.append(new Option(p.l,p.k))); pm.value=S.period; pm.classList.remove("on"); }
+  else { pm.append(new Option("Annan period…","")); others.forEach(p=>pm.append(new Option(p.l,p.k)));
+  pm.value=QUICK.includes(S.period)?"":S.period; pm.classList.toggle("on",!QUICK.includes(S.period)); }
   pm.onchange=()=>{ if(!pm.value) return; S.period=pm.value; store("period",S.period); if(S.period==="custom"){ const [f,t]=periodRange(); S.from=f; S.to=t; } buildFilters(); render(); };
   $("#customRange").hidden = S.period!=="custom";
   if(S.period==="custom"){ const [f,t]=periodRange(); $("#dFrom").value=f; $("#dTo").value=t; }
   const vc=$("#vehSeg"); vc.innerHTML="";
   if(!M) return;
+  const vs=$("#vehSel"); vs.innerHTML=""; vs.append(new Option("Alla bilar",""));
+  M.vlist.forEach(v=>vs.append(new Option(v.name,v.key)));
+  vs.value=S.veh.size===1?[...S.veh][0]:""; vs.onchange=()=>{ S.veh.clear(); if(vs.value) S.veh.add(vs.value); store("veh",[...S.veh]); buildFilters(); render(); };
   const all=document.createElement("button"); all.textContent="Alla bilar"; all.setAttribute("aria-pressed",S.veh.size===0);
   all.onclick=()=>{ S.veh.clear(); store("veh",[]); buildFilters(); render(); }; vc.append(all);
   for(const v of M.vlist){ const b=document.createElement("button"); b.setAttribute("aria-pressed",S.veh.has(v.key));
@@ -1277,6 +1335,8 @@ $("#dTo").onchange=e=>{ S.to=e.target.value; render(); };
 // ───────────────────────── Rendering ─────────────────────────
 let charts=[], mountQ=[];
 let TAB=recall("tab","matning");
+const MOB=()=>matchMedia("(max-width:700px)").matches;
+function fold(inner,title,sub,key){ const s=el(`<section><details class="fold" ${recall(key,false)?"open":""}><summary><span class="sum-t">${title}</span><span class="h-sub">${sub}</span></summary><div class="fold-in"></div></details></section>`); const box=s.querySelector(".fold-in"); inner.style.marginTop="10px"; box.append(inner); s.querySelector("details").addEventListener("toggle",e=>store(key,e.target.open)); return s; }
 function render(){
   charts.forEach(c=>c.destroy()); charts=[];
   if(MAP){ if(!MAPFIT) MAPVIEW={c:MAP.getCenter(),z:MAP.getZoom()}; MAP.remove(); MAP=null; }
@@ -1291,16 +1351,30 @@ function render(){
   const app=$("#app"); app.innerHTML="";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===TAB));
   $("#kmGroup").hidden = TAB==="journal";
-  if(TAB==="journal"){ app.append(...renderJournal(D,from,to)); }
+  if(TAB==="journal"){ let secs=renderJournal(D,from,to);
+    if(MOB()) secs=secs.map((x,i)=>{ if(i<4||x.querySelector("details.fold")) return x; const hs=[...x.querySelectorAll("h2")]; const t=hs.length>1?"Kontroller & kommentarer":(hs[0]?hs[0].childNodes[0].textContent:"Mer"); const sub=hs.length===1&&hs[0].querySelector(".h-sub")?hs[0].querySelector(".h-sub").textContent:""; if(hs.length===1) hs[0].remove(); return fold(x,t,sub,"mj"+i); });
+    app.append(...secs); }
   else if(TAB==="karta"){ app.append(renderMap(from,to)); }
   else {
     const main=el(`<div class="main"></div>`), side=el(`<aside class="side"></aside>`), lay=el(`<div class="layout"></div>`);
-    main.append(secSeason(), secKpis(P,from,to), secProduction(P,from,to), secVehicles(P,from,to,D), secDayLog(P,D), secDeviations(P), secAhead());
-    if(RAW.replan && RAW.replan.length) main.append(secReplan(from,to));
-    side.append(secOrders(P)); lay.append(main,side); app.append(lay);
+    if(MOB()){
+      const st=M.ordStats.filter(x=>ORD_OK(x.o)); const T=st.reduce((a,x)=>a+x.o.total,0), Mm=st.reduce((a,x)=>a+Math.min(x.meas,x.o.total),0), Dl=st.reduce((a,x)=>a+Math.min(x.deliv,x.o.total),0);
+      const del=secDelivery(from,to); del.querySelector(".toolbar")?.remove();
+      const ord=secOrders(P);
+      main.append(secSeason(), secKpis(P,from,to), secVehicles(P,from,to,D), secProduction(P,from,to),
+        fold(ord,"Mätområden",`${nf0.format(Math.floor(100*Mm/T))} % uppmätt · ${km0(T-Mm)} km kvar`,"mMo"),
+        fold(del,"Leveranser",`${km0(Dl)} km · ${pct(Dl,T)} levererat`,"mDl"),
+        secDayLog(P,D), secDeviations(P), fold(secAhead(),"Planerat framåt","kommande 14 dagar","mAh"));
+      if(RAW.replan && RAW.replan.length) main.append(secReplan(from,to));
+      app.append(main);
+    } else {
+      main.append(secSeason(), secKpis(P,from,to), secDelivery(from,to), secProduction(P,from,to), secVehicles(P,from,to,D), secDayLog(P,D), secDeviations(P), secAhead());
+      if(RAW.replan && RAW.replan.length) main.append(secReplan(from,to));
+      side.append(secOrders(P)); lay.append(main,side); app.append(lay);
+    }
   }
   const q=mountQ; mountQ=[]; q.forEach(f=>f());
-  $("#foot").innerHTML = `Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Mätområdenas framsteg räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Totalerna per mätområde kommer från XML-filerna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält. ${S.incKM?"Kontrollmätningar (KM, mättyp 21) är inkluderade.":"Kontrollmätningar (KM, mättyp 21) är exkluderade eftersom de inte ersätts – slå på dem med KM-knappen."} Körjournalen (road_survey_diary) kopplas till bil via registreringsnummer; km per produktionstimme räknar alla uppmätta km i Balder de dagar som har journal.`;
+  $("#foot").innerHTML = (MOB()?`<details><summary>Om datan</summary>`:"")+`Data: Supabase-projektet för Balder, projekt ”${esc(CFG.project)}”. Uppmätt = status körd, paus granskad, bearbetad eller klar. Bilarnas produktion räknas per arbetsdag (en sträcka som mätts om räknas igen den dagen). Mätområdenas framsteg räknar varje unik sträcka en gång och exkluderar egenkontrollsträckor. Totalerna per mätområde kommer från XML-filerna (${ORDERS.length} filer, version ${esc(OI.v)}); en mätsträcka med flera körfält räknas en gång per körfält. ${S.incKM?"Kontrollmätningar (KM, mättyp 21) är inkluderade.":"Kontrollmätningar (KM, mättyp 21) är exkluderade eftersom de inte ersätts – slå på dem med KM-knappen."} Körjournalen (road_survey_diary) kopplas till bil via registreringsnummer; km per produktionstimme räknar alla uppmätta km i Balder de dagar som har journal.`+(MOB()?"</details>":"");
 }
 
 function renderBanners(){
@@ -1318,7 +1392,7 @@ function secSeason(){
   const T=todayStr();
   const tot=ORDERS.filter(ORD_OK).reduce((a,o)=>a+o.total,0);
   let meas=0, sched=0, late=0, last="";
-  let lateTot=0; for(const s of M.ordStats){ if(ORD_OK(s.o)) lateTot+=Math.min(s.measLate,s.o.total); }
+  let lateTot=0, deliv=0; for(const s of M.ordStats){ if(ORD_OK(s.o)){ lateTot+=Math.min(s.measLate,s.o.total); deliv+=Math.min(s.deliv,s.o.total); } }
   for(const s of M.ordStats){ if(!ORD_OK(s.o)) continue; meas+=Math.min(s.meas,s.o.total); sched+=s.scheduled; late+=s.late; if(s.lastPlan>last) last=s.lastPlan; }
   const remain=Math.max(0,tot-meas);
   const unplanned=Math.max(0,remain-sched);
@@ -1329,8 +1403,8 @@ function secSeason(){
    <div class="card">
      <div class="ink2">Säsongen${S.incKM?", inklusive kontrollmätningar":""}</div>
      <div class="num">${km0(meas)} km <small>av ${km0(tot)} km uppmätt</small></div>
-     <div class="bigbar" role="img" aria-label="${pct(meas,tot)} uppmätt"><span style="width:${pm}%;background:var(--good)"></span></div>
-     <div class="legend"><span><b style="color:var(--ink);font-weight:600">${pct(meas,tot)}</b>&nbsp;uppmätt</span><span>${km0(remain)} km kvar att mäta</span>${S.useLimit&&lateTot>=1000?`<span style="color:var(--crit)">varav ${km0(lateTot)} km mätt efter tidsgräns</span>`:""}</div>
+     <div class="bigbar" role="img" aria-label="${pct(deliv,tot)} levererat, ${pct(meas,tot)} uppmätt"><span style="width:${100*deliv/tot}%;background:var(--good)"></span><span style="width:${Math.max(0,pm-100*deliv/tot)}%;background:var(--good);opacity:.4"></span></div>
+     <div class="legend"><span><i class="sw" style="background:var(--good)"></i><b style="color:var(--ink);font-weight:600">${pct(deliv,tot)}</b>&nbsp;levererat (${km0(deliv)} km)</span><span><i class="sw" style="background:var(--good);opacity:.4"></i><b style="color:var(--ink);font-weight:600">${pct(meas,tot)}</b>&nbsp;uppmätt</span><span>${km0(remain)} km kvar att mäta</span>${S.useLimit&&lateTot>=1000?`<span style="color:var(--crit)">varav ${km0(lateTot)} km mätt efter tidsgräns</span>`:""}</div>
    </div>
    <div class="card">
      <div class="ink2">Plan mot slutdatum ${fmtDate(SEASON_END)}</div>
@@ -1343,6 +1417,44 @@ function secSeason(){
        <div class="stat"><div class="l">Planerat bakåt, ej mätt</div><div class="v ${late>=1000?"bad":""}">${km0(late)} km</div></div>
      </div>
    </div></div></section>`);
+}
+
+function secDelivery(from,to){
+  const st=M.ordStats.filter(x=>ORD_OK(x.o));
+  const tot=st.reduce((a,x)=>a+x.o.total,0), dl=st.reduce((a,x)=>a+Math.min(x.deliv,x.o.total),0);
+  const stg=[1,2,3].map(k=>st.reduce((a,x)=>a+x.stg[k],0));
+  const segs=[...M.segAgg.values()].filter(a=>!a.sc&&a.order!=null&&ORD_OK(ORDERS[a.order])&&a.stage===4);
+  const inP=segs.filter(a=>a.dDate&&a.dDate>=from&&a.dDate<=to).reduce((a,x)=>a+x.len,0);
+  const byDay=new Map(); for(const a of segs){ if(!a.dDate) continue; byDay.set(a.dDate,(byDay.get(a.dDate)||0)+a.len); }
+  const last=[...byDay.keys()].sort().pop();
+  const sec=el(`<section><div class="toolbar"><h2>Leveranser<span class="h-sub">status Klar (completed) räknas som levererad</span></h2></div>
+    <div class="grid-kpi">
+      <div class="card kpi"><div class="lbl">Levererat totalt</div><div class="val">${km0(dl)}<small>km</small></div><div class="foot">${pct(dl,tot)} av beställt</div></div>
+      <div class="card kpi"><div class="lbl">Levererat i perioden</div><div class="val">${km0(inP)}<small>km</small></div><div class="foot">${last?"senaste leverans "+fmtDate(last):"ingen leverans än"}</div></div>
+      <div class="card kpi"><div class="lbl">Bearbetat, ej levererat</div><div class="val">${km0(stg[2])}<small>km</small></div><div class="foot">klart att leverera</div></div>
+      <div class="card kpi"><div class="lbl">Körd eller granskad</div><div class="val">${km0(stg[0]+stg[1])}<small>km</small></div><div class="foot">${km0(stg[0])} körd · ${km0(stg[1])} paus granskad</div></div>
+    </div>
+    <div class="two" style="margin-top:16px">
+      <div class="card"><div class="ink2" style="font-size:12px;margin-bottom:6px">Levererade km per leveransdag</div><div class="chartbox" style="height:220px"><canvas aria-label="Levererade km per dag"></canvas></div></div>
+      <div class="card"><div class="ink2" style="font-size:12px;margin-bottom:10px">Var finns de uppmätta km?</div><div class="pipe"></div></div>
+    </div>
+    <details class="fold sub" style="margin-top:12px" ${recall("dvOpen",false)?"open":""}><summary><span class="sum-t">Per mätområde</span><span class="h-sub">levererat och väntande</span></summary><div class="tbl-wrap" style="margin-top:10px"></div></details></section>`);
+  sec.querySelector("details").addEventListener("toggle",e=>store("dvOpen",e.target.open));
+  // pipeline bars
+  const steps=[["Körd",stg[0],"var(--s-none)"],["Paus granskad",stg[1],"var(--s4)"],["Bearbetad",stg[2],"var(--s1)"],["Levererad",dl,"var(--good)"]];
+  const mx=Math.max(1,...steps.map(x=>x[1]));
+  sec.querySelector(".pipe").innerHTML=steps.map(([l,v,c])=>`<div class="hbar"><span>${l}</span><span class="tr"><i style="width:${100*v/mx}%;background:${c}"></i></span><span class="n">${km0(v)} km</span></div>`).join("");
+  // chart
+  const days=[...byDay.keys()].sort(); const cv=sec.querySelector("canvas");
+  const muted=css("--muted"), grid=css("--grid");
+  mountQ.push(()=>charts.push(new Chart(cv,{type:"bar",data:{labels:days.map(fmtDate),datasets:[{label:"Levererat",data:days.map(d=>+(byDay.get(d)/1000).toFixed(1)),backgroundColor:css("--good"),borderRadius:4,maxBarThickness:28}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${nf1.format(c.raw)} km`}}},
+      scales:{x:{grid:{display:false},ticks:{color:muted,maxRotation:0,autoSkip:true}},y:{beginAtZero:true,grid:{color:grid},border:{display:false},ticks:{color:muted},title:{display:true,text:"km",color:muted}}}}})));
+  // table
+  const R=st.map(x=>({x,l:Math.min(x.deliv,x.o.total),m:Math.min(x.meas,x.o.total)})).sort((a,b)=>(LAN[a.x.o.lan]||"").localeCompare(LAN[b.x.o.lan]||"","sv")||a.x.o.name.localeCompare(b.x.o.name,"sv"));
+  sec.querySelector(".tbl-wrap").innerHTML=`<table><thead><tr><th>Mätområde</th><th class="n">Beställt</th><th class="n">Uppmätt</th><th class="n">Levererat</th><th class="n">Andel levererat</th><th class="n">Bearbetat, ej lev.</th><th class="n">Körd/granskad</th></tr></thead><tbody>${R.map(r=>`<tr><td>${esc(r.x.o.name.replace(/\s+26(\s+KM)?$/,r.x.o.km?" KM":""))}</td><td class="n">${km0(r.x.o.total)}</td><td class="n">${km0(r.m)}</td><td class="n"><b>${km0(r.l)}</b></td><td class="n">${pct(r.l,r.x.o.total)}</td><td class="n">${km0(r.x.stg[3])}</td><td class="n">${km0(r.x.stg[1]+r.x.stg[2])}</td></tr>`).join("")}
+    <tr class="total"><td>Summa</td><td class="n">${km0(tot)}</td><td class="n">${km0(R.reduce((a,r)=>a+r.m,0))}</td><td class="n">${km0(dl)}</td><td class="n">${pct(dl,tot)}</td><td class="n">${km0(stg[2])}</td><td class="n">${km0(stg[0]+stg[1])}</td></tr></tbody></table>`;
+  return sec;
 }
 
 function secKpis(P,from,to){
@@ -1371,7 +1483,7 @@ function secProduction(P,from,to){
   sec.querySelector("details").addEventListener("toggle",e=>store("ptOpen",e.target.open));
   sec.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ S.gran=b.dataset.g; store("gran",S.gran); render(); });
   let g=S.gran; let keys=buckets(from,to,g);
-  if(g==="day" && keys.length>120){ g="week"; keys=buckets(from,to,g); sec.querySelector(".h-sub").textContent="uppmätta km · visas per vecka (för många dagar)"; }
+  if(g==="day" && (keys.length>120 || (MOB() && keys.length>21))){ g="week"; keys=buckets(from,to,g); sec.querySelector(".h-sub").textContent="uppmätta km · per vecka"; }
   sec.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.g===g));
   const vs=M.vlist.filter(v=>vehOn(v.key) && (v.key!=="none" || P.some(r=>r.veh==="none"&&MEASURED.has(r.st))));
   const data=new Map(vs.map(v=>[v.key,new Map(keys.map(k=>[k,0]))]));
@@ -1402,6 +1514,7 @@ function secVehicles(P,from,to,D){
   const T=todayStr();
   const sec=el(`<section><h2>Bilar<span class="h-sub">vald period</span></h2><div class="vgrid"></div></section>`);
   const g=sec.querySelector(".vgrid");
+  if(MOB()){ g.className="card vlm"; }
   const spDays=[]; for(let i=13;i>=0;i--) spDays.push(ymd(addDays(new Date(),-i)));
   for(const v of M.vlist){ if(!vehOn(v.key)) continue;
     const mine=P.filter(r=>r.veh===v.key); const m=mine.filter(r=>MEASURED.has(r.st));
@@ -1415,6 +1528,9 @@ function secVehicles(P,from,to,D){
     const bestDay=(()=>{ const by=new Map(); for(const r of m){ by.set(r.date,(by.get(r.date)||0)+r.len); } let b=null; for(const [d,x] of by) if(!b||x>b[1]) b=[d,x]; return b; })();
     const sp=spDays.map(d=>all.filter(r=>r.date===d&&MEASURED.has(r.st)).reduce((a,r)=>a+r.len,0)); const mx=Math.max(1,...sp);
     const labels=[...new Set(today.map(r=>M.wdById.get(r.wd)?.day_label).filter(Boolean))].join(", ");
+    if(MOB()){ g.append(el(`<div class="vr"><div class="vr-h"><i class="sw" style="background:var(${v.color})"></i><b>${esc(v.name)}</b><span class="muted">${esc(v.reg)}</span><span class="vr-km">${km0(kmM)} km</span></div>
+      <div class="vr-s"><span>${vd} dagar · ${vd?km0(kmM/vd):"–"} km/dag</span><span>Idag ${today.length?`${km0(todayDone)}/${km0(todayPlan)} km`:"–"}</span></div>
+      <div class="spark sm">${sp.map((x,i)=>`<i title="${fmtDate(spDays[i])}: ${km(x)} km" style="height:${Math.max(4,100*x/mx)}%;${x?`background:var(${v.color})`:""}"></i>`).join("")}</div></div>`)); continue; }
     g.append(el(`<div class="card vcard">
       <h3><i class="sw" style="background:var(${v.color})"></i>${esc(v.name)} <span class="reg">${esc(v.reg)}</span></h3>
       <div class="big">${km(kmM)} <small>km</small></div>
@@ -1456,7 +1572,7 @@ function renderJournal(D,from,to){
     <div class="card kpi"><div class="lbl">Tekniska problem</div><div class="val">${nf1.format(Tt)}<small>h</small></div><div class="foot">${techDays} dagar med fel eller utrustningsavvikelse</div></div>
     <div class="card kpi"><div class="lbl">Smoke tests utförda</div><div class="val">${smokeN?nf0.format(100*smokeOk/smokeN):0}<small>%</small></div><div class="foot">${smokeOk} av ${smokeN} (morgon, lunch, kväll)</div></div>
   </div></section>`));
-  let g=S.gran, bks=buckets(from,to,g); if(g==="day"&&bks.length>120){ g="week"; bks=buckets(from,to,g); }
+  let g=S.gran, bks=buckets(from,to,g); if(g==="day"&&(bks.length>120||(MOB()&&bks.length>21))){ g="week"; bks=buckets(from,to,g); }
   const ink2=css("--ink-2"), grid=css("--grid"), muted=css("--muted");
   const baseOpts=(unit,stacked)=>({responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
     plugins:{legend:{position:"top",align:"end",labels:{color:ink2,boxWidth:10,boxHeight:10,useBorderRadius:true,borderRadius:3}},
@@ -1711,9 +1827,9 @@ function secOrders(P){
     <div class="mo-list"></div></section>`);
   const periodBy=new Map(); const seen=new Set();
   for(const r of P){ if(!MEASURED.has(r.st)||r.order==null||r.sc||seen.has(r.sid)) continue; const a=M.segAgg.get(r.sid); if(a.mDate!==r.date) continue; seen.add(r.sid); periodBy.set(r.order,(periodBy.get(r.order)||0)+a.len); }
-  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const m=Math.min(S.useLimit?s.measOK:s.meas,s.o.total), late=S.useLimit?Math.min(s.measLate,s.o.total-m):0; const lan=LAN[s.o.lan]||("Län "+s.o.lan);
+  const items=M.ordStats.filter(s=>ORD_OK(s.o)).map(s=>{ const dl=Math.min(s.deliv,s.o.total); const m=Math.min(S.useLimit?s.measOK:s.meas,s.o.total), late=S.useLimit?Math.min(s.measLate,s.o.total-m):0; const lan=LAN[s.o.lan]||("Län "+s.o.lan);
     const short=s.o.name.replace(/\s+26(\s+KM)?$/,"").replace(new RegExp("^"+lan+"\\s+"),"").trim()||s.o.name;
-    return {o:s.o,m,late,t:s.o.total,rem:Math.max(0,s.o.total-m),left:Math.max(0,s.o.total-m-late),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan,short}; });
+    return {o:s.o,m,dl:Math.min(dl,m),late,t:s.o.total,rem:Math.max(0,s.o.total-m),left:Math.max(0,s.o.total-m-late),p:s.o.total?m/s.o.total:0,pp:periodBy.get(s.o.i)||0,lan,short}; });
   const ctl=k=>sec.querySelector(`[data-f="${k}"]`);
   const lanSel=ctl("lan"); [...new Set(items.map(i=>i.lan))].sort((a,b)=>a.localeCompare(b,"sv")).forEach(l=>lanSel.append(new Option(l,l)));
   if(!S.incKM){ F.typ=""; ctl("typ").hidden=true; }
@@ -1736,17 +1852,17 @@ function secOrders(P){
     const sm=L.reduce((a,i)=>a+i.m,0), st=L.reduce((a,i)=>a+i.t,0);
     sec.querySelector(".mo-tot").innerHTML=`<b style="color:var(--ink);font-weight:600">${pc(st?sm/st:0)}</b> ${S.useLimit?"inom tidsgräns":"uppmätt"}`;
     const row=(i,grouped)=>{ const done=i.rem<1000;
-      const tip=`${i.o.name}\n${S.useLimit?"Inom tidsgräns":"Uppmätt"}: ${km(i.m)} av ${km(i.t)} km (${pct(i.m,i.t)})${i.late>=100?`\nMätt efter tidsgräns: ${km(i.late)} km`:""}\nKvar att mäta: ${km(i.left)} km${i.pp?`\nI perioden: +${km(i.pp)} km`:""}`;
-      return `<div class="mr${done?" done":""}" title="${esc(tip)}"><span class="mn">${esc(grouped?i.short:i.o.name.replace(/\s+26(\s+KM)?$/,""))}${i.o.km?'<span class="tag">KM</span>':""}</span><span class="mb"><i style="width:${100*i.p}%"></i>${i.late>=100?`<i class="late" style="width:${100*i.late/i.t}%"></i>`:""}</span><span class="mp${i.late>=1000?" warn":""}">${pc(i.p)}</span></div>`; };
+      const tip=`${i.o.name}\n${S.useLimit?"Inom tidsgräns":"Uppmätt"}: ${km(i.m)} av ${km(i.t)} km (${pct(i.m,i.t)})${i.late>=100?`\nMätt efter tidsgräns: ${km(i.late)} km`:""}\nLevererat: ${km(i.dl)} km (${pct(i.dl,i.t)})\nKvar att mäta: ${km(i.left)} km${i.pp?`\nI perioden: +${km(i.pp)} km`:""}`;
+      return `<div class="mr${done?" done":""}" title="${esc(tip)}"><span class="mn">${esc(grouped?i.short:i.o.name.replace(/\s+26(\s+KM)?$/,""))}${i.o.km?'<span class="tag">KM</span>':""}</span><span class="mb"><i style="width:${100*i.dl/i.t}%"></i><i class="ndl" style="width:${100*(i.m-i.dl)/i.t}%"></i>${i.late>=100?`<i class="late" style="width:${100*i.late/i.t}%"></i>`:""}</span><span class="mp${i.late>=1000?" warn":""}">${pc(i.p)}</span></div>`; };
     const box=sec.querySelector(".mo-list");
     if(!L.length){ box.innerHTML=`<div class="empty">Inga mätområden matchar.</div>`; return; }
     if(F.sort==="lan"){
       const groups=new Map(); for(const i of L){ (groups.get(i.lan)||groups.set(i.lan,[]).get(i.lan)).push(i); }
       box.innerHTML=[...groups.entries()].map(([lan,g])=>{ const m=g.reduce((a,i)=>a+i.m,0), t=g.reduce((a,i)=>a+i.t,0), lt=g.reduce((a,i)=>a+i.late,0);
         g.sort((a,b)=>(a.o.km-b.o.km)||a.o.name.localeCompare(b.o.name,"sv"));
-        return `<div class="mg"><div class="mgh" title="${esc(lan)}: ${km(m)} av ${km(t)} km ${S.useLimit?"inom tidsgräns":"uppmätt"}${lt>=100?`, ${km(lt)} km mätt efter tidsgräns`:""}, kvar ${km(t-m-lt)} km"><span class="mn">${esc(lan)}</span><span class="mb"><i style="width:${t?100*m/t:0}%"></i>${lt>=100?`<i class="late" style="width:${100*lt/t}%"></i>`:""}</span><span class="mp">${pc(t?m/t:0)}</span></div>${g.map(i=>row(i,true)).join("")}</div>`; }).join("");
+        return `<div class="mg"><div class="mgh" title="${esc(lan)}: ${km(m)} av ${km(t)} km ${S.useLimit?"inom tidsgräns":"uppmätt"}, ${km(g.reduce((a,i)=>a+i.dl,0))} km levererat${lt>=100?`, ${km(lt)} km mätt efter tidsgräns`:""}, kvar ${km(t-m-lt)} km"><span class="mn">${esc(lan)}</span><span class="mb"><i style="width:${t?100*g.reduce((a,i)=>a+i.dl,0)/t:0}%"></i><i class="ndl" style="width:${t?100*(m-g.reduce((a,i)=>a+i.dl,0))/t:0}%"></i>${lt>=100?`<i class="late" style="width:${100*lt/t}%"></i>`:""}</span><span class="mp">${pc(t?m/t:0)}</span></div>${g.map(i=>row(i,true)).join("")}</div>`; }).join("");
     } else box.innerHTML=`<div class="mg">${L.map(i=>row(i,false)).join("")}</div>`;
-    if(S.useLimit&&L.some(i=>i.late>=100)) box.insertAdjacentHTML("beforeend",`<div class="mo-leg"><span><i style="background:var(--good)"></i>Inom tidsgräns</span><span><i style="background:var(--crit)"></i>Mätt efter tidsgräns</span></div>`);
+    box.insertAdjacentHTML("beforeend",`<div class="mo-leg"><span><i style="background:var(--good)"></i>Levererat</span><span><i style="background:var(--good);opacity:.4"></i>Uppmätt</span>${S.useLimit&&L.some(i=>i.late>=100)?`<span><i style="background:var(--crit)"></i>Efter tidsgräns</span>`:""}</div>`);
   };
   ctl("q").addEventListener("input",e=>{ F.q=e.target.value; draw(); });
   ["lan","typ","status","sort"].forEach(k=>ctl(k).addEventListener("change",e=>{ F[k]=e.target.value;
@@ -1818,7 +1934,9 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden && lastLo
 // rita om vid dygnsbyte så "Idag" stämmer
 let dayNow=todayStr(); setInterval(()=>{ if(todayStr()!==dayNow){ dayNow=todayStr(); render(); } },60000);
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>render());
+matchMedia("(max-width:700px)").addEventListener("change",()=>{ buildFilters(); render(); });
 
+if(window.Chart){ Chart.defaults.animation.duration=350; Chart.defaults.font.family=getComputedStyle(document.body).fontFamily; if(MOB()){ Chart.defaults.font.size=11; } }
 buildFilters();
 loadAll().then(()=>{ buildFilters(); render(); });
 startRealtime();
