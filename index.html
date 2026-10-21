@@ -393,6 +393,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 /* Översikt */
 :root{--q-nolcms:#2b2f33;--q-nl:#a1887f} :root[data-theme="dark"]{--q-nl:#bca59c} :root[data-theme="dark"]{--q-nolcms:#e8eaec}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--q-nolcms:#e8eaec}}
+.dq-share{flex-basis:100%;display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px;font-size:12.5px}
 .pm-why{margin:6px 0 4px 18px;padding:0}
 .ml-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);padding:6px 6px 2px;border-top:1px solid var(--line);margin-top:4px;cursor:pointer}
 .ml-row i.halo{height:8px;border-radius:4px;background:var(--q-nolcms);opacity:.3}
@@ -1295,7 +1296,11 @@ const WD=["sön","mån","tis","ons","tor","fre","lör"];
 const fmtDate = s => { const d=parseD(s); return WD[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]; };
 function bucketKey(s,g){ if(g==="day") return s; if(g==="week") return weekStart(s); return s.slice(0,7); }
 function bucketLabel(k,g){ if(g==="day") return fmtDate(k); if(g==="week"){ const w=isoWeek(k); return "v."+w.w; } const [y,m]=k.split("-"); return MONTHS_L[+m-1]+" "+y; }
-function store(k,v){ try{ localStorage.setItem("matuppf_"+k,JSON.stringify(v)); }catch(e){} }
+// Inlagd data som ska delas mellan alla som öppnar sidan. Sparas i webbläsaren och, om tabellen finns, i Supabase.
+const SHARED=["rds","pms","invoices","nolcms","price","share"];
+const SH={state:"local",err:null,at:null};
+function store(k,v){ try{ localStorage.setItem("matuppf_"+k,JSON.stringify(v)); }catch(e){} if(SHARED.includes(k)) shPush(k,v); }
+function unstore(k){ try{ localStorage.removeItem("matuppf_"+k); }catch(e){} if(SHARED.includes(k)) shDel(k); }
 function recall(k,def){ try{ const v=localStorage.getItem("matuppf_"+k); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
 
 // ───────────────────────── Tema ─────────────────────────
@@ -1307,6 +1312,17 @@ $("#themeBtn").onclick = () => {
 
 // ───────────────────────── Supabase REST ─────────────────────────
 const H = {apikey:CFG.key, Authorization:"Bearer "+CFG.key};
+const SH_TABLE="matuppfoljning_state";
+async function shPush(k,v){ if(SH.state!=="shared") return; try{ const r=await fetch(CFG.url+"/rest/v1/"+SH_TABLE+"?on_conflict=key",{method:"POST",headers:Object.assign({"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},H),body:JSON.stringify({key:k,value:v,updated_at:new Date().toISOString()})}); if(!r.ok) throw new Error("HTTP "+r.status); SH.err=null; }catch(e){ SH.err="Kunde inte spara "+k+" till Supabase ("+e.message+")"; console.error(e); } }
+async function shDel(k){ if(SH.state!=="shared") return; try{ await fetch(CFG.url+"/rest/v1/"+SH_TABLE+"?key=eq."+encodeURIComponent(k),{method:"DELETE",headers:H}); }catch(e){} }
+async function shLoad(){
+  let rows; try{ rows=await rest(SH_TABLE+"?select=key,value,updated_at"); }catch(e){ SH.state=e.status===404||/PGRST205|does not exist|schema cache/i.test(e.message)?"local":"error"; SH.err=SH.state==="error"?e.message:null; return false; }
+  SH.state="shared"; SH.at=new Date(); const have=new Set();
+  for(const r of rows){ if(!SHARED.includes(r.key)) continue; have.add(r.key); try{ if(localStorage.getItem("matuppf_"+r.key)!==JSON.stringify(r.value)) localStorage.setItem("matuppf_"+r.key,JSON.stringify(r.value)); }catch(e){} }
+  // första gången: lägg upp det som bara finns lokalt
+  for(const k of SHARED){ if(have.has(k)) continue; let v=null; try{ v=localStorage.getItem("matuppf_"+k); }catch(e){} if(v!=null){ try{ await shPush(k,JSON.parse(v)); }catch(e){} } }
+  return true;
+}
 async function rest(path, range){
   const h = Object.assign({}, H); if(range) { h.Range=range; h["Range-Unit"]="items"; }
   const r = await fetch(CFG.url+"/rest/v1/"+path,{headers:h,cache:"no-store"});
@@ -1388,6 +1404,7 @@ async function loadAll(){
     let diary=[]; try{ diary = await restAll("road_survey_diary?select=*&order=entry_date"); }catch(e){ diary=[]; }
     let replan=null; try{ replan = await restAll("replan_history?select=*&order=created_at.desc"); }catch(e){ replan=null; }
     RAW = {pid, vehicles, faults, files, rsegs, wds, segs:parts.flat(), replan, diary};
+    try{ if(await shLoad()){ rdsInit(); PMSV++; DQ=null; } }catch(e){ console.error(e); }
     M = buildModel(RAW); lastLoad=new Date(); loadErr=null;
   }catch(e){ console.error(e); loadErr=e; }
   loading=false; setLive(); render();
@@ -1896,12 +1913,12 @@ async function rdsUpload(file){
     const x=rdsExtract(XLSX,wb);
     if(!x.rows.length) throw new Error("Bladet "+x.sheet+" innehåller inga rader.");
     const snap={name:file.name,fileDate:new Date(file.lastModified).toISOString(),loadedAt:new Date().toISOString(),sheet:x.sheet,maxDate:x.maxDate,rows:x.rows};
-    let saved=true; try{ localStorage.setItem("matuppf_rds",JSON.stringify(snap)); }catch(e){ saved=false; }
+    let saved=true; try{ localStorage.setItem("matuppf_rds",JSON.stringify(snap)); }catch(e){ saved=false; } shPush("rds",snap);
     RDS=Object.assign(snap,{local:true,unsaved:!saved});
   }catch(e){ console.error(e); RDS_ERR="Kunde inte läsa filen: "+e.message; }
   DQ=null; render();
 }
-function rdsReset(){ try{ localStorage.removeItem("matuppf_rds"); }catch(e){} RDS=RDS_EMB; DQ=null; render(); }
+function rdsReset(){ unstore("rds"); RDS=RDS_EMB; DQ=null; render(); }
 
 // Framflyttat till nästa år: SoT-vägar (vägnummer 500 och uppåt) i Blekinge (10) och Skåne (12)
 const POSTPONED={lans:[10,12], minRoad:500, label:"SoT i Blekinge och Skåne är framflyttat till 2027"};
@@ -2056,6 +2073,12 @@ function renderDQMap(){
       <div class="dq-meta${age>3?" old":""}">Inläst ${fmtTs(RDS.loadedAt)}${RDS.fileDate?` · filen sparad ${fmtTs(RDS.fileDate)}`:""} · senaste datum i filen ${newest}${RDS.local?` · <span title="Uppladdningen sparas bara i din webbläsare. Andra som öppnar sidan ser den inbyggda versionen tills sidan publiceras om.">din uppladdade version${RDS.unsaved?" (kunde inte sparas, försvinner vid omladdning)":""}</span>`:" · inbyggd version"}${age>3?` · <b>${nf0.format(Math.floor(age))} dagar gammal</b>`:""}</div></div></div>
       <div class="dq-f-r">${RDS.local&&RDS_EMB?`<button class="btn" data-a="reset">Använd inbyggd version</button>`:""}<button class="btn pri" data-a="up">Ladda upp ny version</button></div>`;
   }
+  { const sh=el(`<div class="dq-share ${SH.state}">${SH.state==="shared"?`<b>Delas med alla</b> <span class="muted">· statusfil, PMS-besked, fakturor och listor sparas i Supabase${SH.err?` · <span class="crit">${esc(SH.err)}</span>`:""}</span>`:SH.state==="error"?`<b class="crit">Kunde inte nå den delade lagringen</b> <span class="muted">· ${esc(SH.err||"")} · ändringar sparas bara i din webbläsare</span>`:`<b class="warnt">Sparas bara i din webbläsare</b> <span class="muted">· det du lägger in här syns inte för andra eller på en annan adress. Se LÄS MIG för hur det delas.</span>`}
+      <span class="dq-f-r"><button class="btn" data-b="exp">Säkerhetskopia</button><button class="btn" data-b="imp">Importera</button><input type="file" accept=".json" hidden></span></div>`);
+    sh.querySelector('[data-b="exp"]').onclick=()=>{ const o={}; for(const k of SHARED){ try{ const v=localStorage.getItem("matuppf_"+k); if(v!=null) o[k]=JSON.parse(v); }catch(e){} } dl("matuppfoljning-data-"+todayStr()+".json",JSON.stringify({v:1,saved:new Date().toISOString(),data:o}),"application/json"); };
+    const fi=sh.querySelector('input[type=file]'); sh.querySelector('[data-b="imp"]').onclick=()=>fi.click();
+    fi.onchange=async()=>{ try{ const x=JSON.parse(await fi.files[0].text()); const d=x.data||x; let n=0; for(const k of SHARED) if(d[k]!=null){ store(k,d[k]); n++; } rdsInit(); PMSV++; DQ=null; PMS_MSG="Importerade "+n+" delar från säkerhetskopian."; render(); }catch(e){ RDS_ERR="Kunde inte läsa säkerhetskopian."; render(); } };
+    fileBox.append(sh); }
   { const D0=buildDQ(); const vs=[...D0.pms.values()]; const ok=vs.filter(v=>v.st==="ok").length;
     const last=vs.reduce((a,v)=>(v.at||"")>a?v.at:a,"");
     const box=el(`<details class="dq-pms"${PMS_MSG?" open":""}><summary><b>PMS-besked från Trafikverket</b> <span class="muted">· ${vs.length} leveranser (${ok} godkända, ${vs.length-ok} förkastade)${last?" · senast inlagt "+fmtTs(last):""}${D0.pmsMiss.length?` · <span class="warnt">${D0.pmsMiss.length} kunde inte kopplas</span>`:""}</span></summary>
@@ -2078,7 +2101,7 @@ function renderDQMap(){
       ${D1.nlMiss.length?`<div class="dq-note">Finns inte i beställningarna: ${D1.nlMiss.map(esc).join(", ")}</div>`:""}</div></details>`);
     nb.querySelector("textarea").value=nolcmsText();
     nb.querySelector('[data-n="save"]').onclick=()=>{ store("nolcms",nb.querySelector("textarea").value); render(); };
-    const nr=nb.querySelector('[data-n="reset"]'); if(nr) nr.onclick=()=>{ try{ localStorage.removeItem("matuppf_nolcms"); }catch(e){} render(); };
+    const nr=nb.querySelector('[data-n="reset"]'); if(nr) nr.onclick=()=>{ unstore("nolcms"); render(); };
     fileBox.append(nb); }
   if(RDS_ERR) fileBox.insertAdjacentHTML("beforeend",`<div class="banner err" style="flex-basis:100%;margin:0">${esc(RDS_ERR)}</div>`);
   fileBox.append(inp);
@@ -2336,7 +2359,7 @@ function secInvoices(){
     ${L.length?`<div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Datum</th><th>Fakturanr</th><th>Avser månad</th><th>Avser</th><th class="n">Km</th><th class="n">Belopp</th><th>Kommentar</th><th></th></tr></thead><tbody>
       ${L.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.nr||"–")}</td><td>${x.month?MONTHS_L[+x.month.slice(5)-1]+" "+x.month.slice(0,4):"–"}</td><td>${INV_TYP[x.typ]||esc(x.typ)}</td><td class="n">${x.km?nf1.format(x.km):"–"}</td><td class="n"><b>${kr(+x.amount||0)}</b></td><td class="wrap">${esc(x.note||"")}</td><td><button class="iconbtn del" data-id="${esc(x.id)}" title="Ta bort" aria-label="Ta bort faktura"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/></svg></button></td></tr>`).join("")}
       <tr class="total"><td colspan="5">Totalt</td><td class="n">${kr(tot)}</td><td colspan="2"></td></tr></tbody></table></div>`:`<div class="empty">Inga fakturor inlagda ännu.</div>`}
-    <div class="muted" style="font-size:12px;margin-top:8px">Fakturorna sparas i din webbläsare på den här datorn. Ta en säkerhetskopia då och då, eller importera den på en annan dator.</div></section>`);
+    <div class="muted" style="font-size:12px;margin-top:8px">${SH.state==="shared"?"Fakturorna sparas i Supabase och syns för alla som öppnar sidan.":"Fakturorna sparas bara i din webbläsare på den här adressen. Ta en säkerhetskopia, eller slå på delad lagring (se LÄS MIG)."}</div></section>`);
   const f=sec.querySelector(".inv-form"); const v=n=>f.querySelector(`[name="${n}"]`).value;
   sec.querySelector('[data-x="add"]').onclick=()=>{ const amount=+v("amount"); if(!(amount>0)){ f.querySelector('[name="amount"]').focus(); f.querySelector('[name="amount"]').classList.add("bad"); return; }
     const L2=invList(); L2.push({id:Date.now().toString(36),date:v("date"),nr:v("nr").trim(),month:v("month"),typ:v("typ"),km:+v("km")||0,amount,note:v("note").trim()}); invSave(L2); };
