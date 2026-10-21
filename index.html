@@ -394,6 +394,42 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 :root{--q-nolcms:#2b2f33;--q-nl:#a1887f} :root[data-theme="dark"]{--q-nl:#bca59c} :root[data-theme="dark"]{--q-nolcms:#e8eaec}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--q-nolcms:#e8eaec}}
 .dq-share{flex-basis:100%;display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px;font-size:12.5px}
+.scen{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:thin}
+.scen button{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:1px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;text-align:left}
+.scen button b{font-size:13px;font-weight:600} .scen button span{font-size:11.5px;color:var(--muted)}
+.scen button:hover{border-color:var(--line-strong)} .scen button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)} .scen button[aria-selected="true"] span{color:var(--accent-ink);opacity:.75}
+.scen button.risk b{color:var(--crit)} .scen button.risk[aria-selected="true"]{background:var(--crit);border-color:var(--crit)} .scen button.risk[aria-selected="true"] b{color:#fff}
+.scen-card{margin-bottom:12px} .scen-d{font-size:13px;color:var(--ink-2);margin-bottom:10px}
+.scen-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 20px} .scen-k div{display:flex;flex-direction:column} .scen-k b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em} .scen-k b.ok{color:var(--good-text)} .scen-k span{font-size:12px;color:var(--muted)}
+@media (max-width:700px){.scen-k{grid-template-columns:1fr 1fr}.scen-k b{font-size:18px}}
+.scen-lan{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 20px;margin-top:12px;font-size:12.5px} .scen-lan div{display:grid;grid-template-columns:110px 1fr 40px;gap:8px;align-items:center} .scen-lan b{text-align:right;font-variant-numeric:tabular-nums} .scen-lan .dq-bar{height:6px}
+.risk-list{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.risk{border:1px solid var(--line);border-left:4px solid var(--line-strong);border-radius:8px;padding:0 12px} .risk.red{border-left-color:var(--crit)} .risk.amber{border-left-color:var(--warn)} .risk.orange{border-left-color:var(--q-prob)} .risk.orange .rk-h,.orng{color:var(--q-prob)}
+.risk summary{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.3fr) auto;gap:4px 14px;align-items:center;padding:9px 0;cursor:pointer;font-size:13px}
+.rk-n{font-weight:600} .rk-h{color:var(--ink-2)} .risk.red .rk-h{color:var(--crit)} .risk.amber .rk-h{color:var(--warn)} .rk-v{font-variant-numeric:tabular-nums;color:var(--ink-2);text-align:right}
+@media (max-width:700px){.risk summary{grid-template-columns:1fr}.rk-v{text-align:left}}
+.risk ul{margin:0 0 10px 18px;padding:0;font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:3px}
+.qbox{position:relative;align-self:center;flex:0 1 360px;min-width:180px;margin-left:auto}
+.qbox input{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:7px 10px 7px 30px;font:13px var(--font)}
+.qbox input:focus{outline:none;border-color:var(--focus);background:var(--surface)}
+.q-ic{position:absolute;left:9px;top:50%;width:14px;height:14px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.q-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:1300;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-height:60vh;overflow-y:auto;padding:4px;min-width:320px}
+.q-it{display:grid;grid-template-columns:10px 1fr;gap:2px 8px;align-items:center;width:100%;text-align:left;border:none;background:none;padding:7px 8px;border-radius:6px;cursor:pointer;color:var(--ink);font:12.5px var(--font)}
+.q-it .muted{grid-column:2;font-size:11.5px} .q-it:hover,.q-it.on{background:var(--hover)} .q-it code{font-size:12px}
+.q-empty{padding:10px;font-size:12.5px;color:var(--muted)}
+.live{margin-left:0}
+@media (max-width:700px){.qbox{order:5;flex:1 1 100%;margin:0 0 8px}.q-list{min-width:0}}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);z-index:1400;background:var(--surface);border-left:1px solid var(--line);box-shadow:-8px 0 32px rgba(0,0,0,.16);overflow-y:auto}
+.md-in{padding:18px 20px 40px} .md-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.md-id code{font-size:14px;font-weight:600;word-break:break-all;white-space:normal;display:inline-block;max-width:100%} .md-top>div:first-child{min-width:0;flex:1} .md-act{display:flex;gap:6px;align-items:center;flex:none}
+.md-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;gap:1px;background:var(--track)} .md-bar i{display:block;height:100%}
+.md-ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}
+.md-sum{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-2);margin:10px 0} .md-sum span{display:inline-flex;align-items:center;gap:5px} .md-sum i{width:9px;height:9px;border-radius:2px} .md-sum b{color:var(--ink);font-weight:600}
+.drawer h3{font-size:13px;margin:18px 0 8px}
+.md-t{font-size:12.5px} .md-t td,.md-t th{padding:5px 8px}
+.md-rec{border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:8px} .md-rec.skip{opacity:.6}
+.md-rh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;margin-bottom:6px} .md-rh .muted{font-size:12px}
+.md-rec dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:12.5px} .md-rec dt{color:var(--muted)} .md-rec dd{margin:0}
 .pm-why{margin:6px 0 4px 18px;padding:0}
 .ml-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);padding:6px 6px 2px;border-top:1px solid var(--line);margin-top:4px;cursor:pointer}
 .ml-row i.halo{height:8px;border-radius:4px;background:var(--q-nolcms);opacity:.3}
@@ -424,6 +460,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 <header class="top"><div class="top-in">
   <div class="title"><h1 id="ttl">Mätuppföljning</h1><div class="sub" id="subttl">Road Plan 2026</div></div>
   <nav class="tabs" id="tabs" role="tablist"><button role="tab" data-tab="oversikt"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>Översikt</button><button role="tab" data-tab="matning"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17V9M8 17V4M13 17v-6M18 17V7"/></svg>Mätning</button><button role="tab" data-tab="karta"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5l5-2 6 2 5-2v12l-5 2-6-2-5 2z"/><path d="M7 3v12M13 5v12"/></svg>Karta</button><button role="tab" data-tab="journal"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Körjournal</button><button role="tab" data-tab="budget"><svg class="ti" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="5" width="15" height="11" rx="1.5"/><path d="M2.5 8.5h15M6 12.5h3"/></svg>Budget</button></nav>
+  <div class="qbox"><svg class="q-ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><input id="q" type="search" placeholder="Sök mätsträcka, t.ex. V6-L14-U20…" autocomplete="off" spellcheck="false" aria-label="Sök mätsträcka"><div id="qList" class="q-list" hidden></div></div>
   <div class="live">
     <span id="liveState"><span class="dot"></span>Ansluter…</span>
     <span id="updated"></span>
@@ -447,6 +484,7 @@ details.fold.sub .sum-t{font-size:13px;font-weight:500}
 
   <footer id="foot"></footer>
 </div>
+<aside id="msDrawer" class="drawer" hidden aria-label="Mätsträcka"></aside>
 
 <style>/* required styles */
 
@@ -1935,7 +1973,7 @@ function msIndex(){
 }
 const kmNum=v=>{ const x=parseFloat(String(v==null?"":v).replace(",",".")); return isFinite(x)?x*1000:NaN; };
 function buildDQ(){
-  const useNL=recall("useNL",false);
+  const useNL=recall("useNL",false)||recall("scen","")==="nolcms";
   if(DQ && DQM===M && DQV===RDS && DQ.pv===PMSV && DQ.nlt===nolcmsText() && DQ.useNL===useNL) return DQ;
   const X=msIndex();
   for(const list of X.byOrder) for(const ms of list){ ms.recs=[]; ms.bal=[]; ms.pieces=[]; }
@@ -2057,7 +2095,7 @@ function renderDQMap(){
   const hide=new Set(recall("dqHide",[]));
   const sec=el(`<section class="mapsec"><div class="toolbar"><h2>Karta<span class="h-sub">vad vi faktiskt har för data</span></h2>
     <div class="fgroup">${modeSeg()}<select class="sel" id="mapOrder" aria-label="Mätområde"><option value="">Alla mätområden</option></select></div></div>
-    <div class="dq-file"></div><div class="dq-sum"></div>
+    <div class="dq-file"></div><div class="dq-scenwrap"></div><div class="dq-sum"></div>
     <div class="maplayout"><div class="mapwrap"><div id="map" role="region" aria-label="Karta över datastatus"></div><div class="maplegend"></div></div><aside class="mapside"></aside></div>
     <div class="dq-tab"></div>
     <div class="muted dq-foot" style="font-size:12px;margin-top:8px">Varje mätsträcka delas upp per meter. Där flera inspelningar täcker samma sträcka gäller den som kommit längst i kedjan. Dubbletter markerade ”Duplicate, skip” räknas inte. Glapp under 150 m mellan två inspelningar räknas som avrundning, eftersom filen anger km med en decimal. Datastatus visar hela säsongen oavsett vald period och bil.</div></section>`);
@@ -2073,7 +2111,7 @@ function renderDQMap(){
       <div class="dq-meta${age>3?" old":""}">Inläst ${fmtTs(RDS.loadedAt)}${RDS.fileDate?` · filen sparad ${fmtTs(RDS.fileDate)}`:""} · senaste datum i filen ${newest}${RDS.local?` · <span title="Uppladdningen sparas bara i din webbläsare. Andra som öppnar sidan ser den inbyggda versionen tills sidan publiceras om.">din uppladdade version${RDS.unsaved?" (kunde inte sparas, försvinner vid omladdning)":""}</span>`:" · inbyggd version"}${age>3?` · <b>${nf0.format(Math.floor(age))} dagar gammal</b>`:""}</div></div></div>
       <div class="dq-f-r">${RDS.local&&RDS_EMB?`<button class="btn" data-a="reset">Använd inbyggd version</button>`:""}<button class="btn pri" data-a="up">Ladda upp ny version</button></div>`;
   }
-  { const sh=el(`<div class="dq-share ${SH.state}">${SH.state==="shared"?`<b>Delas med alla</b> <span class="muted">· statusfil, PMS-besked, fakturor och listor sparas i Supabase${SH.err?` · <span class="crit">${esc(SH.err)}</span>`:""}</span>`:SH.state==="error"?`<b class="crit">Kunde inte nå den delade lagringen</b> <span class="muted">· ${esc(SH.err||"")} · ändringar sparas bara i din webbläsare</span>`:`<b class="warnt">Sparas bara i din webbläsare</b> <span class="muted">· det du lägger in här syns inte för andra eller på en annan adress. Se LÄS MIG för hur det delas.</span>`}
+  { const sh=el(`<div class="dq-share ${SH.state}"><span>${SH.state==="shared"?`<b>Delas med alla</b> <span class="muted">· statusfil, PMS-besked, fakturor och listor sparas i Supabase${SH.err?` · <span class="crit">${esc(SH.err)}</span>`:""}</span>`:SH.state==="error"?`<b class="crit">Kunde inte nå den delade lagringen</b> <span class="muted">· ${esc(SH.err||"")} · ändringar sparas bara i din webbläsare</span>`:`<b class="warnt">Sparas bara i din webbläsare</b> <span class="muted">· det du lägger in här syns inte för andra eller på en annan adress. Se LÄS MIG för hur det delas.</span>`}</span>
       <span class="dq-f-r"><button class="btn" data-b="exp">Säkerhetskopia</button><button class="btn" data-b="imp">Importera</button><input type="file" accept=".json" hidden></span></div>`);
     sh.querySelector('[data-b="exp"]').onclick=()=>{ const o={}; for(const k of SHARED){ try{ const v=localStorage.getItem("matuppf_"+k); if(v!=null) o[k]=JSON.parse(v); }catch(e){} } dl("matuppfoljning-data-"+todayStr()+".json",JSON.stringify({v:1,saved:new Date().toISOString(),data:o}),"application/json"); };
     const fi=sh.querySelector('input[type=file]'); sh.querySelector('[data-b="imp"]').onclick=()=>fi.click();
@@ -2123,6 +2161,7 @@ function renderDQMap(){
   const A=agg(scopeOrders); const tot=Object.values(A.t).reduce((a,b)=>a+b,0)||1;
   const have=A.t.sak+A.t.lev+A.t.bea+A.t.ins;
   const scopeName=MAPF.order!==""?shortName(ORDERS[+MAPF.order]):MAPF.lan!==""?(LAN[+MAPF.lan]||"Län "+MAPF.lan):"Alla mätområden";
+  { const w=sec.querySelector(".dq-scenwrap"); w.innerHTML=scenChips()+scenPanel(D,o=>inScope(o)&&(MAPF.order===""||o.i===+MAPF.order),false); bindScen(w); }
   sec.querySelector(".dq-sum").innerHTML=`<div class="card dq-card"><div class="dq-head"><div><div class="dq-scope">${esc(scopeName)}</div>
       <div class="dq-big"><span><b>${pct(A.t.sak,tot)}</b> godkänt av TRV</span><span><b>${pct(A.t.sak+A.t.lev,tot)}</b> levererat</span><span><b>${pct(have,tot)}</b> data finns</span><span><b>${pct(have+A.t.bal,tot)}</b> körd enligt Balder</span></div></div>
       <div class="muted dq-tot">${km0(tot)} km beställt</div></div>
@@ -2144,8 +2183,9 @@ function renderDQMap(){
   legend.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ store("dqHide",PRE[b.dataset.p]); render(); });
   // ── sidopanel: län → mätområden
   const side=sec.querySelector(".mapside");
-  const rowH=(label,list,attrs,sel,sub)=>{ const a=agg(list); const T=a.tot||1; return `<button class="ms-row dq-r${sel?" sel":""}${sub?" sub":""}" ${attrs}><span class="ms-n">${esc(label)}</span><span class="ms-p" title="Godkänt av TRV">${nf0.format(Math.floor(100*a.t.sak/T))} %</span>${dqBar(a.t,T)}<span class="ms-k">${km0(a.t.sak)} godkänt · ${km0(a.t.sak+a.t.lev+a.t.bea+a.t.ins)} data finns${a.t.pro>500?` · <span class="crit">${km0(a.t.pro)} problem</span>`:""}${a.t.bal>500?` · ${km0(a.t.bal)} obekräftat`:""} av ${km0(a.tot)} km</span></button>`; };
-  let sh=`<div class="ms-h"><h2>${MAPF.lan===""?"Per län":esc(LAN[+MAPF.lan]||"")}</h2><span class="mo-tot">% = godkänt</span></div>`;
+  const SK=scenNow(), SST=scenStats(SK==="risk"?"lev":SK);
+  const rowH=(label,list,attrs,sel,sub)=>{ const a=agg(list); const T=a.tot||1; let so=0,stt=0; for(const o of list){ so+=SST[o.i].ok; stt+=SST[o.i].tot; } return `<button class="ms-row dq-r${sel?" sel":""}${sub?" sub":""}" ${attrs}><span class="ms-n">${esc(label)}</span><span class="ms-p" title="${esc(SCENS.find(x=>x.k===SK).l)}">${nf0.format(Math.floor(100*(stt?so/stt:0)))} %</span>${dqBar(a.t,T)}<span class="ms-k">${km0(a.t.sak)} godkänt · ${km0(a.t.sak+a.t.lev+a.t.bea+a.t.ins)} data finns${a.t.pro>500?` · <span class="crit">${km0(a.t.pro)} problem</span>`:""}${a.t.bal>500?` · ${km0(a.t.bal)} obekräftat`:""} av ${km0(a.tot)} km</span></button>`; };
+  let sh=`<div class="ms-h"><h2>${MAPF.lan===""?"Per län":esc(LAN[+MAPF.lan]||"")}</h2><span class="mo-tot">% = ${esc((SK==="risk"?"levererat":SCENS.find(x=>x.k===SK).l).toLowerCase())}</span></div>`;
   if(MAPF.lan===""){ sh+=rowH("Alla län",ORDERS.filter(ORD_OK),`data-lan=""`,true)+lans.map(([l,n])=>rowH(n,ORDERS.filter(o=>ORD_OK(o)&&o.lan===l),`data-lan="${l}"`,false)).join(""); }
   else { sh+=`<button class="ms-back" data-lan="">← Alla län</button>`+rowH("Hela länet",ORDERS.filter(o=>inScope(o)),`data-ord=""`,MAPF.order==="")+
     ORDERS.filter(inScope).sort((a,b)=>(a.km-b.km)||a.name.localeCompare(b.name,"sv")).map(o=>rowH(shortName(o),[o],`data-ord="${o.i}"`,String(MAPF.order)===String(o.i),true)).join(""); }
@@ -2197,11 +2237,17 @@ function renderDQMap(){
     const order=["none","bal","nolcms","raw","fp","rev","proc","qa","lev","acc","trvok","prob","rej"]; const bounds=L.latLngBounds([]);
     if(showNL){ const hc=css("--q-nolcms"); for(const o of scopeOrders) for(const ms of msIndex().byOrder[o.i]){ if(!ms.nl) continue; const g=msGeom(ms); if(!g) continue; const geom=sliceGeom(g,Math.max(ms.s,g.s),Math.min(ms.e,g.e)); if(geom.length<2) continue;
       const h=L.polyline(geom,{renderer:rend,color:hc,weight:11,opacity:.28,lineCap:"round"}).addTo(MAP); h.on("click",e=>{ const p=ms.pieces[0]||{lo:ms.s,hi:ms.e,st:"none"}; L.popup({maxWidth:360}).setLatLng(e.latlng).setContent(dqPopup({ms,p})).openOn(MAP); }); } }
+    const SK=scenNow(); const RL=SK==="risk"?new Map(riskCalc(D).map(r=>[r.o.i,r.lvl])):null; const cG=css("--q-none"), cR=css("--crit"), cA=css("--warn"), cO=css("--q-prob"), cOk=css("--q-acc");
+    const sty=it=>{ const st=it.p.st;
+      if(SK==="risk"){ const done=scenOK("lev",it.p); const lv=RL.get(it.ms.i)||"ok"; if(done) return {color:cOk,weight:3,opacity:.85}; if(lv==="red") return {color:cR,weight:4,opacity:.95}; if(lv==="orange") return {color:cO,weight:3.8,opacity:.95}; if(lv==="amber") return {color:cA,weight:3.6,opacity:.95}; return {color:cG,weight:2.4,opacity:.7}; }
+      if(!scenOK(SK,it.p)) return {color:cG,weight:2,opacity:.5,dashArray:st==="none"?"4 4":null};
+      return {color:col[st],weight:(st==="rej"||st==="prob")?4.2:3.2,opacity:.95,dashArray:st==="bal"?"7 5":null,lineCap:st==="bal"?"butt":"round"}; };
     for(const st of order) for(const it of items){ if(it.p.st!==st) continue;
-      const line=L.polyline(it.geom,{renderer:rend,color:col[st],weight:st==="none"?2:(st==="rej"||st==="prob")?4.2:3.2,opacity:st==="none"?.55:.95,dashArray:st==="none"?"4 4":st==="bal"?"7 5":null,lineCap:st==="bal"?"butt":"round"}).addTo(MAP);
+      const line=L.polyline(it.geom,Object.assign({renderer:rend,lineCap:"round"},sty(it))).addTo(MAP);
       bounds.extend(line.getBounds());
       line.on("click",e=>{ L.popup({maxWidth:360}).setLatLng(e.latlng).setContent(dqPopup(it)).openOn(MAP); }); }
     if(MAPVIEW&&!MAPFIT) MAP.setView(MAPVIEW.c,MAPVIEW.z); else if(bounds.isValid()) MAP.fitBounds(bounds,{padding:[20,20]}); else MAP.setView([62,16],5);
+    if(FOCUS){ const ms=FOCUS; FOCUS=null; const g=msGeom(ms); if(g){ const geom=sliceGeom(g,Math.max(ms.s,g.s),Math.min(ms.e,g.e)); if(geom.length>1){ const hl=L.polyline(geom,{renderer:rend,color:css("--ink"),weight:10,opacity:.28,lineCap:"round"}).addTo(MAP); hl.bringToBack(); MAP.fitBounds(hl.getBounds(),{padding:[60,60],maxZoom:13}); setTimeout(()=>document.getElementById("map").scrollIntoView({behavior:"smooth",block:"center"}),50); } } }
     MAPFIT=false; MAPVIEW=null;
   });
   // ── ej kopplade rader
@@ -2476,7 +2522,7 @@ function renderOverview(P,from,to){
   const ageD=RDS?Math.floor((Date.now()-new Date(RDS.loadedAt))/864e5):null;
   const flow=[["sak","Godkänt","--q-acc"],["lev","Levererat","--q-lev"],["bea","Bearbetat","--q-proc"],["ins","Insamlat","--q-raw"],["nl","Utan LCMS","--q-nl"],["pro","Problem","--q-prob"],["bal","Obekräftat","--q-bal"],["none","Ej mätt","--q-none"]].filter(f=>f[0]!=="nl"||S.nl>0);
   const tot=Object.values(S).reduce((a,b)=>a+b,0)||1;
-  const sec=el(`<section class="ov">
+  const sec=el(`<section class="ov">${scenChips()}<div class="ov-scen">${D?scenPanel(D,null,true):`<div class="card"><div class="empty">Ladda upp statusfilen för att se scenarier.</div></div>`}</div>
     <div class="ov-grid">
       <button class="card ov-c" data-go="matning"><div class="ov-h">Mätning <span>${D?"årets uppdrag":"Balder"}</span></div>
         <div class="ov-big">${nf0.format(Math.floor(100*MM/MT))} %<small>uppmätt</small></div>
@@ -2507,9 +2553,166 @@ function renderOverview(P,from,to){
       <button data-go="karta" data-mode="dq"><b class="${ageD>3?"warnt":""}">${ageD===0?"idag":ageD+" d"}</b><span>sedan statusfilen lästes in (${esc(RDS.name||"")})</span></button>`:""}
       ${M.newFiles.length?`<button data-go="matning"><b>${M.newFiles.length}</b><span>nya mätområdesfiler i Balder som saknas i indexet</span></button>`:""}
     </div></div></section>`);
+  bindScen(sec);
   sec.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>goTab(b.dataset.go,()=>{ if(b.dataset.mode) store("mapMode",b.dataset.mode); if(b.dataset.rej) store("rejOpen",true); if(b.dataset.hide){ const PRE={problem:DQS.map(d=>d[0]).filter(k=>!["rej","prob"].includes(k)),obekr:DQS.map(d=>d[0]).filter(k=>k!=="bal")}; store("dqHide",PRE[b.dataset.hide]); } }));
   out.push(sec); return out;
 }
+
+// ───────────────────────── Scenarier ─────────────────────────
+// Samma meter-för-meter-data, olika krav på vad som "räknas".
+const SCENS=[
+  {k:"sakert",  l:"Helt säkert",        s:"godkänt av TRV i PMS",            d:"Det här har Trafikverket godkänt. Det kan faktureras och kan inte tas ifrån oss."},
+  {k:"lev",     l:"Levererat",          s:"godkänt + väntar på svar",        d:"Godkänt plus det som är levererat men inte fått svar. Kan fortfarande förkastas."},
+  {k:"garanti", l:"Kan garanteras TRV", s:"levererat eller klart att leverera", d:"Det vi kan lova Trafikverket idag: godkänt, levererat eller bearbetat och granskat utan anmärkningar, alltså klart att leverera. Inget med problem, FP, ogranskad bearbetning eller anmärkningar räknas."},
+  {k:"matt",    l:"Säkert mätt",        s:"minst granskat",                  d:"Data som är granskad och inte har problem, oavsett om den är levererad. Bearbetning markerad FP och bearbetat utan granskning räknas inte."},
+  {k:"data",    l:"All data vi har",    s:"insamlat eller bättre",           d:"All data som finns enligt statusfilen, även ogranskad och FP, men inte avvisade leveranser eller dataproblem."},
+  {k:"nolcms",  l:"Med data utan LCMS", s:"räddade sträckor räknas",         d:"Som ”All data vi har” plus extra inspelningar utan LCMS-data, där inget bättre finns."},
+  {k:"balder",  l:"Enligt Balder",      s:"det vi tror att vi kört",         d:"Allt som är kört enligt Balder eller finns i statusfilen – även sträckor där datan kan saknas."},
+  {k:"risk",    l:"Risker",             s:"vite och förkastade mätområden",  d:"Vad som händer om det som inte är levererat den 1 december inte blir levererat (§ 5.1 och § 5.51), och om kontrollmätningarna inte räcker (bilaga 4)."}];
+const scenNow=()=>{ const k=recall("scen","sakert"); return SCENS.some(x=>x.k===k)?k:"sakert"; };
+function scenOK(k,p){
+  const st=p.st;
+  switch(k){
+    case "sakert": return st==="acc"||st==="trvok";
+    case "lev":    return st==="acc"||st==="trvok"||st==="lev";
+    case "garanti": return !!p.rec && (["trvok","acc","lev"].includes(st) || (["qa","proc"].includes(st) && /\d{4}-\d\d-\d\d|^yes/i.test(p.rec.r[5]||"") && !(p.rec.c.warn||[]).length));
+    case "matt":   return !!p.rec && ["trvok","acc","lev","qa","proc","rev"].includes(st) && !(p.rec.c.warn||[]).some(w=>/utan granskning/i.test(w));
+    case "data":   return !!p.rec && !["rej","prob","nolcms"].includes(st);
+    case "nolcms": return !!p.rec && !["rej","prob"].includes(st);
+    case "balder": return st!=="none";
+    default:       return st==="acc"||st==="trvok"||st==="lev";
+  } }
+// per mätområde: km som räknas och årets omfattning (framflyttat bortsett från det som redan är godkänt)
+function scenStats(k){
+  const X=msIndex(); const out=ORDERS.map(()=>({ok:0,tot:0}));
+  for(const list of X.byOrder) for(const ms of list) for(const p of ms.pieces){ const L=p.hi-p.lo; const acc=p.st==="acc"||p.st==="trvok"; if(ms.pp&&!acc) continue; out[ms.i].tot+=L; if(scenOK(k,p)) out[ms.i].ok+=L; }
+  return out;
+}
+// Risk per mätområde enligt kontraktet
+function riskCalc(D){
+  const price=+recall("price",BUD_DEF.price)||BUD_DEF.price;
+  const T0=todayStr(), daysLeft=Math.max(0,Math.round((parseD("2026-12-01")-parseD(T0))/864e5));
+  const del=scenStats("lev"), dat=scenStats("data");
+  const kmByName=new Map(ORDERS.filter(o=>o.km).map(o=>[o.name.replace(/\s+KM$/,""),o]));
+  return ORDERS.filter(o=>!o.km).map(o=>{
+    const tot=del[o.i].tot; if(tot<1) return null;
+    const pp=D.ppSum[o.i]; const t=tiers(D.sum[o.i]), tp=tiers(pp); const g=k=>t[k]-(k==="sak"?0:tp[k]);
+    const miss=Math.max(0,tot-del[o.i].ok), share=miss/tot, V=tot*price/1000;
+    const need10=Math.max(0,miss-0.1*tot); // minst så här mycket måste levereras för att hamna under 10 %
+    const parts={bea:g("bea"),ins:g("ins"),pro:g("pro"),bal:g("bal"),none:g("none"),nl:g("nl")};
+    const hard=parts.pro+parts.bal+parts.none+parts.nl; // inte leveransbart som det ser ut idag
+    let lvl="ok", risk=0, head="";
+    if(hard>0.1*tot){ lvl="red"; risk=2*V; head="Data saknas – risk att förlora hela mätområdet"; }
+    else if(share>0.1){ lvl="orange"; risk=2*V; head="Måste levereras i tid – annars förloras mätområdet"; }
+    else if(miss>500){ lvl="amber"; risk=2*miss*price/1000; head="Prisavdrag och vite per km"; }
+    // kontrollmätning: kontrollerad längd ≥ 5 % av mätt längd
+    const ko=kmByName.get(o.name); let km=null;
+    if(ko){ const prodM=dat[o.i].ok, ctl=dat[ko.i].ok, req=0.05*prodM; km={ctl,prodM,req,short:Math.max(0,req-ctl),ratio:prodM?ctl/prodM:0,small:prodM<200000}; if(km.short>500&&!km.small){ if(lvl==="ok") { lvl="amber"; head="Kontrollmätning under 5 %"; } } }
+    const actions=[];
+    if(lvl==="red") actions.push(`<span class="crit">${km0(hard)} km (${nf0.format(100*hard/tot)} %) går inte att leverera som det ser ut nu – minst ${km0(Math.max(0,hard-0.1*tot))} km av det måste räddas för att komma under 10 %</span>`);
+    if(lvl==="red"||lvl==="orange") actions.push(`Leverera minst <b>${km0(need10)} km</b> före 1 dec (${daysLeft?nf0.format(need10/1000/daysLeft):"–"} km/dag) för att komma under 10 % – helst alla ${km0(miss)} km`);
+    else if(lvl!=="ok"&&miss>500) actions.push(`Leverera resterande <b>${km0(miss)} km</b> före 1 dec`);
+    if(lvl!=="ok"){
+      if(parts.bea>500) actions.push(`${km0(parts.bea)} km är bearbetat – leverera`);
+      if(parts.ins>500) actions.push(`${km0(parts.ins)} km är insamlat men inte färdigbearbetat – bearbeta och leverera`);
+      if(parts.pro>500) actions.push(`<span class="crit">${km0(parts.pro)} km har problem eller avvisad leverans – åtgärda eller mät om</span>`);
+      if(parts.bal>500) actions.push(`${km0(parts.bal)} km är körda enligt Balder men saknas i statusfilen – leta upp datan`);
+      if(parts.none>500) actions.push(`${km0(parts.none)} km är inte mätt alls – måste mätas`);
+      if(parts.nl>500) actions.push(`${km0(parts.nl)} km har bara data utan LCMS`);
+    }
+    if(km&&km.short>500&&!km.small) actions.push(`Kontrollmätning ${nf1.format(100*km.ratio)} % av mätt längd – mät minst <b>${km0(km.short)} km</b> till för att nå 5 %. Annars ska ytterligare 3 % kontrollmätas, och underkänns kontrollen ska hela mätområdet mätas om utan ersättning`);
+    return {o,tot,miss,share,V,risk,lvl,head,need10,parts,km,actions,daysLeft};
+  }).filter(Boolean).sort((a,b)=>({red:0,orange:1,amber:2,ok:3}[a.lvl]-{red:0,orange:1,amber:2,ok:3}[b.lvl])||b.risk-a.risk);
+}
+function scenChips(){ const k=scenNow(); return `<div class="scen" role="tablist" aria-label="Scenario">${SCENS.map(x=>`<button role="tab" data-scen="${x.k}" aria-selected="${x.k===k}" class="${x.k==="risk"?"risk":""}"><b>${x.l}</b><span>${x.s}</span></button>`).join("")}</div>`; }
+function bindScen(root){ const sc=root.querySelector(".scen"), se=sc&&sc.querySelector('[aria-selected="true"]'); if(se) requestAnimationFrame(()=>{ sc.scrollLeft=Math.max(0,se.offsetLeft-sc.offsetLeft-16); }); root.querySelectorAll("[data-scen]").forEach(b=>b.onclick=()=>{ store("scen",b.dataset.scen); DQ=null; render(); }); }
+// Scenario-kortet (används på översikten och i datastatus)
+function scenPanel(D,orderFilter,compact){
+  const k=scenNow(), S=SCENS.find(x=>x.k===k);
+  const price=+recall("price",BUD_DEF.price)||BUD_DEF.price, share=Math.min(100,Math.max(0,+recall("share",BUD_DEF.share)))/100, pY=price*share/1000;
+  const mkr=v=>Math.abs(v)>=1e6?new Intl.NumberFormat("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2}).format(v/1e6)+" mkr":nf0.format(Math.round(v/1000))+" tkr";
+  const prod=ORDERS.filter(o=>!o.km&&(!orderFilter||orderFilter(o)));
+  if(k==="risk"){
+    const R=riskCalc(D).filter(r=>prod.includes(r.o)); const red=R.filter(r=>r.lvl==="red"), org=R.filter(r=>r.lvl==="orange"), amb=R.filter(r=>r.lvl==="amber");
+    const tot=R.reduce((a,r)=>a+r.risk,0);
+    return `<div class="card scen-card"><div class="scen-d">${esc(S.d)}</div>
+      <div class="scen-k"><div><b class="crit">${red.length}</b><span>saknar data för mer än 10 %</span></div><div><b class="orng">${org.length}</b><span>klarar sig om allt levereras i tid</span></div><div><b class="warnt">${amb.length}</b><span>risk för avdrag per km</span></div><div><b>${mkr(tot)}</b><span>i värsta fall · ${R[0]?R[0].daysLeft:"–"} dagar kvar</span></div></div>
+      <div class="risk-list">${R.filter(r=>r.lvl!=="ok").slice(0,compact?6:99).map(r=>`<details class="risk ${r.lvl}"><summary><span class="rk-n">${esc(shortName(r.o))}</span><span class="rk-h">${esc(r.head)}</span><span class="rk-v">${nf0.format(Math.round(100*r.share))} % ej levererat · ${mkr(r.risk)}</span></summary>
+        <ul>${r.actions.map(a=>`<li>${a}</li>`).join("")}</ul></details>`).join("")||`<div class="muted">Inga mätområden i riskzonen.</div>`}
+        ${compact&&R.filter(r=>r.lvl!=="ok").length>6?`<div class="muted" style="font-size:12px">… och ${R.filter(r=>r.lvl!=="ok").length-6} till under Karta → Datastatus.</div>`:""}</div>
+      <div class="muted" style="font-size:12px;margin-top:8px">Räknat som om inget mer levereras före 1 december. Fel på mer än 10 % av ett mätområdes längd: allvarligt fel ger 100 % avdrag och lika stort vite, mindre allvarligt 50 % avdrag. Upp till 10 %: avdrag per km och vite. Framflyttade sträckor ingår inte. Ingen hänsyn till eventuell tidsförlängning.</div></div>`;
+  }
+  const st=scenStats(k), bal=scenStats("balder"); let ok=0,tot=0,b=0; const byLan=new Map();
+  for(const o of prod){ ok+=st[o.i].ok; tot+=st[o.i].tot; b+=bal[o.i].ok; const x=byLan.get(o.lan)||{ok:0,tot:0}; x.ok+=st[o.i].ok; x.tot+=st[o.i].tot; byLan.set(o.lan,x); }
+  const lans=[...byLan].map(([l,x])=>({l,...x,p:x.tot?x.ok/x.tot:0})).sort((a,b)=>a.p-b.p);
+  return `<div class="card scen-card"><div class="scen-d">${esc(S.d)}</div>
+    <div class="scen-k"><div><b class="ok">${pct(ok,tot)}</b><span>av årets uppdrag</span></div><div><b>${km0(ok)} km</b><span>av ${km0(tot)} km</span></div><div><b>${mkr(ok*pY)}</b><span>värde vägyta</span></div><div><b class="${b-ok>500?"warnt":""}">${km0(Math.max(0,b-ok))} km</b><span>mindre än Balder tror</span></div></div>
+    <span class="dq-bar" style="height:10px;margin-top:10px"><i style="width:${tot?100*ok/tot:0}%;background:var(--q-acc)"></i><i style="width:${tot?100*Math.max(0,b-ok)/tot:0}%;background:var(--q-bal);opacity:.55"></i></span>
+    ${compact?`<div class="scen-lan">${lans.map(x=>`<div><span>${esc(LAN[x.l]||x.l)}</span><span class="dq-bar"><i style="width:${100*x.p}%;background:var(--q-acc)"></i></span><b>${nf0.format(Math.floor(100*x.p))} %</b></div>`).join("")}</div>`:""}</div>`;
+}
+
+// ───────────────────────── Sök mätsträcka ─────────────────────────
+let FOCUS=null;
+function segIv(sid){ const rs=M&&M.rsById.get(sid); let road,lanes,dir,lo,hi;
+  if(rs&&rs.p&&rs.p.VagNr!=null){ road=String(Math.round(+rs.p.VagNr)); dir=rs.p.VagRiktning; lanes=String(rs.p.Korfalt||"K1").split(","); lo=+rs.p.StartLop; hi=+rs.p.SlutLop; }
+  else { let q=String(sid).split("_"); if(q.length===6) q=q.slice(0,5); if(q.length!==5) return null; road=q[0]; lanes=[q[1]]; dir=q[2]; lo=+q[3]; hi=+q[4]; }
+  if(!isFinite(lo)||!isFinite(hi)) return null; if(lo>hi) [lo,hi]=[hi,lo]; return {road,lanes:lanes.map(x=>x.trim().toUpperCase()),dir:String(dir).toLowerCase(),lo,hi}; }
+function searchMs(q){
+  const t=String(q||"").trim().toUpperCase().replace(/\s+/g,""); if(t.length<2) return [];
+  const all=[...msIndex().byKey.values()];
+  const dc=/^\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d/.exec(String(q).trim());
+  if(dc&&RDS){ if(RDS) buildDQ(); const ids=new Set(RDS.rows.filter(r=>r[4]===dc[0]).map(r=>String(r[1]||"").toUpperCase())); return all.filter(ms=>ids.has(ms.id.toUpperCase())||ms.recs.some(v=>v.r[4]===dc[0])); }
+  const exact=all.find(ms=>ms.id.toUpperCase()===t); if(exact) return [exact];
+  const t2=/^\d+$/.test(t)?"V"+t+"-":t;
+  return all.filter(ms=>ms.id.toUpperCase().includes(t2)).sort((a,b)=>a.id.localeCompare(b.id,"sv",{numeric:true})).slice(0,40);
+}
+function msBest(ms){ if(!ms.pieces||!ms.pieces.length) return "none"; let b=null,bl=0; const tot={}; for(const p of ms.pieces){ tot[p.st]=(tot[p.st]||0)+p.hi-p.lo; } for(const k in tot) if(tot[k]>bl){ bl=tot[k]; b=k; } return b; }
+function openMs(ms){
+  if(RDS) buildDQ();
+  const o=ORDERS[ms.i], L=ms.e-ms.s;
+  const box=$("#msDrawer"); box.hidden=false; document.body.classList.add("drawer-open");
+  const row=(k,v)=>v?`<dt>${k}</dt><dd>${v}</dd>`:"";
+  // status längs sträckan
+  const bar=ms.pieces.length?`<div class="md-bar">${ms.pieces.map(p=>`<i style="width:${100*(p.hi-p.lo)/L}%;background:var(${DQC[p.st]})" title="${nf1.format(p.lo/1000)}–${nf1.format(p.hi/1000)} km: ${esc(DQL[p.st])}"></i>`).join("")}</div><div class="md-ticks"><span>${nf1.format(ms.s/1000)} km</span><span>${nf1.format(ms.e/1000)} km</span></div>`:"";
+  const sum={}; for(const p of ms.pieces) sum[p.st]=(sum[p.st]||0)+p.hi-p.lo;
+  const scen=SCENS.filter(x=>x.k!=="risk").map(x=>{ const ok=ms.pieces.reduce((a,p)=>a+(scenOK(x.k,p)?p.hi-p.lo:0),0); return `<tr><td>${esc(x.l)}</td><td class="n">${km(ok)} km</td><td class="n">${pct(ok,L)}</td></tr>`; }).join("");
+  // inspelningar i statusfilen
+  const recs=ms.recs.slice().sort((a,b)=>String(a.r[4]).localeCompare(String(b.r[4])));
+  const recH=recs.map(v=>{ const r=v.r, c=v.c, st=c.skip?null:c.st; return `<div class="md-rec${c.skip?" skip":""}"><div class="md-rh"><i class="sw" style="background:var(${st?DQC[st]:"--q-none"})"></i><b>${st?esc(DQL[st]):"Dubblett – används inte"}</b><span class="muted">${esc(r[0]||"")} · ${esc(r[4]||"")} · km ${nf1.format(v.lo/1000)}–${nf1.format(v.hi/1000)}</span></div>
+    <dl>${c.st==="nolcms"?row("LCMS","Saknas – extra inspelning"):row("Granskad",esc(r[5]||"–"))+row("Bearbetad",esc(r[7]||"–"))+row("QA",esc(r[9]||"–"))+row("Levererad",r[10]?"Ja":"–")+row("Leveransstatus",esc(r[11]||""))+(c.pms?row("PMS",(c.pms.st==="ok"?"Godkänd":"Förkastad")+(c.pms.date?" "+esc(c.pms.date):"")):"")+row("TRV",esc(r[12]||""))}
+    ${c.why?`<dt>Orsak</dt><dd class="crit">${esc(c.why)}</dd>`:""}${c.warn&&c.warn.length?`<dt>Anmärkning</dt><dd class="warnt">${c.warn.map(esc).join("<br>")}</dd>`:""}${row("Kommentar",esc([r[6],r[14]].filter(Boolean).join(" · ")))}</dl></div>`; }).join("")||`<div class="muted">Ingen rad i statusfilen.</div>`;
+  // Balder
+  const bal=[]; if(M) for(const r of M.rows){ if(r.order!==ms.i) continue; const x=segIv(r.sid); if(!x||x.road!==ms.road||x.dir!==ms.dir.toLowerCase()||!x.lanes.includes(ms.lane)) continue; const a=Math.max(x.lo,ms.s), b=Math.min(x.hi,ms.e); if(b-a<1) continue; bal.push({r,a,b}); }
+  bal.sort((p,q)=>String(p.r.date||"").localeCompare(String(q.r.date||""))||p.a-q.a);
+  const balH=bal.length?`<table class="md-t"><thead><tr><th>Datum</th><th>Bil</th><th>Status</th><th class="n">Km</th></tr></thead><tbody>${bal.map(x=>`<tr><td>${x.r.date?fmtDate(x.r.date):"utan datum"}</td><td>${esc(M.vehMap.get(x.r.veh)?.name||"")}</td><td>${esc(STATUS_LBL[x.r.st]||x.r.st)}${x.r.fault?` <span class="muted">(${esc(x.r.fault.label)})</span>`:""}</td><td class="n">${nf1.format(x.a/1000)}–${nf1.format(x.b/1000)}</td></tr>`).join("")}</tbody></table>`:`<div class="muted">Inte inplanerad i Balder.</div>`;
+  const nl=nolcmsList().filter(e=>e.id===ms.id.toUpperCase());
+  const gap=ms.pieces.filter(p=>(p.st==="bal"||p.st==="none")&&p.hi-p.lo>=200);
+  box.innerHTML=`<div class="md-in"><div class="md-top"><div><div class="md-id"><code>${esc(ms.id)}</code></div><div class="muted">${esc(shortName(o))} · ${esc(LAN[o.lan]||"")} · ${km(L)} km${ms.pp?" · framflyttat till 2027":""}${o.km?" · kontrollmätning":""}</div></div>
+      <div class="md-act"><button class="btn" id="mdMap">Visa på kartan</button><button class="iconbtn" id="mdClose" aria-label="Stäng">✕</button></div></div>
+    ${RDS?`${bar}<div class="md-sum">${DQS.filter(d=>sum[d[0]]).map(d=>`<span><i style="background:var(${d[2]})"></i>${esc(d[1])} <b>${km(sum[d[0]])} km</b></span>`).join("")}</div>
+      ${!recs.length&&bal.length?`<div class="dq-note">Hela mätsträckan är körd enligt Balder men finns inte i statusfilen.</div>`:gap.length?`<div class="dq-note">Luckor: ${gap.map(p=>`${nf1.format(p.lo/1000)}–${nf1.format(p.hi/1000)} km (${p.st==="bal"?"körd enligt Balder, saknas i filen":"ej mätt"})`).join(", ")}</div>`:""}
+      ${ms.nl?`<div class="dq-note">${ms.nl} extra inspelning${ms.nl>1?"ar":""} utan LCMS-data: ${nl.map(e=>esc(e.veh+" "+(e.dc||e.note))).join(", ")}</div>`:""}
+      <h3>Scenarier</h3><table class="md-t"><tbody>${scen}</tbody></table>
+      <h3>Inspelningar i statusfilen <span class="muted">(${recs.length})</span></h3>${recH}`:`<div class="dq-note">Ingen statusfil inläst – visar bara Balder.</div>`}
+    <h3>Balder <span class="muted">(${bal.length} segment)</span></h3>${balH}</div>`;
+  box.querySelector("#mdClose").onclick=closeMs;
+  box.querySelector("#mdMap").onclick=()=>{ FOCUS=ms; MAPF.lan=String(o.lan); MAPF.order=String(ms.i); store("mapF",MAPF); store("mapMode","dq"); MAPFIT=true; closeMs(); TAB="karta"; store("tab","karta"); render(); window.scrollTo({top:0}); };
+  box.scrollTop=0;
+}
+function closeMs(){ const b=$("#msDrawer"); b.hidden=true; document.body.classList.remove("drawer-open"); }
+(function initSearch(){
+  const inp=$("#q"), list=$("#qList"); let res=[], sel=-1;
+  const draw=()=>{ if(!res.length){ list.hidden=!inp.value.trim(); list.innerHTML=inp.value.trim().length>=2?`<div class="q-empty">Hittar ingen mätsträcka.</div>`:""; if(inp.value.trim().length<2) list.hidden=true; return; }
+    list.hidden=false; if(RDS) buildDQ();
+    list.innerHTML=res.map((ms,i)=>{ const b=RDS?msBest(ms):null; return `<button class="q-it${i===sel?" on":""}" data-i="${i}">${b?`<i class="sw" style="background:var(${DQC[b]})"></i>`:""}<code>${esc(ms.id)}</code><span class="muted">${esc(shortName(ORDERS[ms.i]))}${b?" · "+esc(DQL[b]):""}</span></button>`; }).join("");
+    list.querySelectorAll(".q-it").forEach(b=>b.onmousedown=e=>{ e.preventDefault(); pick(+b.dataset.i); }); };
+  const pick=i=>{ const ms=res[i]; if(!ms) return; list.hidden=true; inp.blur(); openMs(ms); };
+  inp.addEventListener("input",()=>{ if(!M){ list.hidden=true; return; } res=searchMs(inp.value); sel=res.length===1?0:-1; draw(); });
+  inp.addEventListener("keydown",e=>{ if(e.key==="ArrowDown"){ sel=Math.min(res.length-1,sel+1); draw(); e.preventDefault(); } else if(e.key==="ArrowUp"){ sel=Math.max(0,sel-1); draw(); e.preventDefault(); } else if(e.key==="Enter"){ if(res.length) pick(sel<0?0:sel); } else if(e.key==="Escape"){ list.hidden=true; inp.blur(); } });
+  inp.addEventListener("blur",()=>setTimeout(()=>{ list.hidden=true; },150));
+  inp.addEventListener("focus",()=>{ if(inp.value.trim().length>=2&&M){ res=searchMs(inp.value); draw(); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("#msDrawer").hidden) closeMs(); if(e.key==="/"&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); inp.focus(); } });
+})();
 
 // ───────────────────────── Karta ─────────────────────────
 let MAPFIT=false, MAP=null, MAPVIEW=null, GEO=null, MAPF={lan:"",order:""}; try{ Object.assign(MAPF, JSON.parse(localStorage.getItem("matuppf_mapF")||"{}")); }catch(e){}
